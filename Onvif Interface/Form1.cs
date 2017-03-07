@@ -8,25 +8,49 @@ using Onvif_Interface.OnvifDeviceManagementServiceReference;
 using System.ServiceModel.Discovery;
 using System.IO;
 using Onvif_Interface.OnvifPtzServiceReference;
+using System.ServiceModel.Description;
 
 namespace Onvif_Interface
 {
     public partial class Form1 : Form
     {
+        private string IP;
+        private int Port;
 
         public Form1()
         {
             InitializeComponent();
+            btnPanLeft.MouseDown += BtnPanLeft_MouseDown;
+            btnPanRight.MouseDown += BtnPanRight_MouseDown;
+            btnTiltDown.MouseDown += BtnTiltDown_MouseDown;
+            btnTiltUp.MouseDown += BtnTiltUp_MouseDown;
+            btnZoomIn.MouseDown += BtnZoomIn_MouseDown;
+            btnZoomOut.MouseDown += BtnZoomOut_MouseDown;
+
+            btnPanLeft.MouseUp += BtnPanLeft_MouseUp;
+            btnPanRight.MouseUp += BtnPanRight_MouseUp;
+            btnTiltDown.MouseUp += BtnTiltDown_MouseUp;
+            btnTiltUp.MouseUp += BtnTiltUp_MouseUp;
+            btnZoomIn.MouseUp += BtnZoomIn_MouseUp;
+            btnZoomOut.MouseUp += BtnZoomOut_MouseUp;
         }
 
         private void btnGetOnvifInfo_Click(object sender, EventArgs e)
         {
+            IP = txtIP.Text;
+            Port = (int)numPort.Value;
+
             tssLbl.Text = "Scanning device";
             btnGetOnvifInfo.Enabled = false;
             UseWaitCursor = true;
+            gbxPtzControl.Visible = false;
+
+            lbxCapabilities.Items.Clear();
+            lbxPtzInfo.Items.Clear();
+
             try
             {
-                GetOnvifInfo(txtIP.Text, (int)numPort.Value);
+                GetOnvifInfo(IP, Port);
             }
             catch (Exception ex)
             {
@@ -58,6 +82,8 @@ namespace Onvif_Interface
             {
                 client.Endpoint.Behaviors.Add(new EndpointDiscoveryBehavior());
 
+                gbxPtzControl.Visible = true;
+
                 // We can now ask for information
                 // ONVIF application programmer guide (5.1.3) suggests checking time first 
                 // (no auth required) so time offset can be determined (needed for auth if applicable)
@@ -67,7 +93,11 @@ namespace Onvif_Interface
 
                 GetCapabilities(client);
 
-                PTZTest(client, ip, port);
+                if (lbxCapabilities.Items.Contains("http://www.onvif.org/ver20/ptz/wsdl"))
+                {
+                    gbxPtzControl.Visible = true;
+                    PTZTest(client, ip, port);
+                }
             }
         }
 
@@ -116,9 +146,7 @@ namespace Onvif_Interface
 
         private void GetCapabilities(DeviceClient client)
         {
-            lbxCapabilities.Items.Clear();
-
-            //capabilities = client.GetCapabilities(new CapabilityCategory[] { CapabilityCategory.All });
+            //OnvifDeviceManagementServiceReference.Capabilities capabilities = client.GetCapabilities(new CapabilityCategory[] { CapabilityCategory.All });
 
             //if (capabilities.Analytics != null) { lbxCapabilities.Items.Add("Analytics"); }
             //if (capabilities.Events != null) { lbxCapabilities.Items.Add("Events"); }
@@ -155,83 +183,180 @@ namespace Onvif_Interface
 
         private void PTZTest(DeviceClient client, string ip, int port)
         {
-            if (lbxCapabilities.Items.Contains("http://www.onvif.org/ver20/ptz/wsdl"))
+            // Create Media object
+            OnvifMediaServiceReference.MediaClient mediaService = GetOnvifMediaClient(ip, port);
+
+            // Create PTZ object
+            PTZClient ptzService = GetOnvifPTZClient(ip, port); // new PTZClient(client.Endpoint.Binding, client.Endpoint.Address);
+
+            lbxPtzInfo.Items.Add("Supported Operations");
+            foreach (OperationDescription odc in ptzService.Endpoint.Contract.Operations)
             {
-                // Create Media object
-                OnvifMediaServiceReference.MediaClient mediaService = GetOnvifMediaClient(ip, port);
+                lbxPtzInfo.Items.Add("  " + odc.Name);
+            }
+            Console.WriteLine(ptzService);
 
-                // Create PTZ object
-                PTZClient ptzService = GetOnvifPTZClient(ip, port); // new PTZClient(client.Endpoint.Binding, client.Endpoint.Address);
-                Console.WriteLine(ptzService);
+            // Get target profile
+            string profileToken = "0";
+            OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
 
-                // Get target profile
-                string profileToken = "0";
-                OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
+            // Get Presets
+            PTZPreset[] presets = ptzService.GetPresets(profileToken);
+            lbxPtzInfo.Items.Add("");
+            lbxPtzInfo.Items.Add("Presets");
+            foreach (PTZPreset p in presets)
+            {
+                lbxPtzInfo.Items.Add(string.Format("  Preset {0} ({1}) @ {2}:{3} {4}", p.Name, p.token, p.PTZPosition.PanTilt.x, p.PTZPosition.PanTilt.y, p.PTZPosition.Zoom.x));
+            }
 
-                // Get Presets
-                PTZPreset[] presets = ptzService.GetPresets(profileToken);
+            UpdatePtzLocation(ptzService, profileToken);
 
-                // Get Status
-                PTZStatus status = ptzService.GetStatus(profileToken);
+            //// Get Nodes
+            //OnvifPtzServiceReference.PTZNode[] nodes = ptz.GetNodes();
+            //Console.WriteLine(nodes.Length);
 
-                //// Get Nodes
-                //OnvifPtzServiceReference.PTZNode[] nodes = ptz.GetNodes();
-                //Console.WriteLine(nodes.Length);
+            //foreach (OnvifPtzServiceReference.PTZNode n in nodes)
+            //{
+            //    lbxCapabilities.Items.Add("PTZ " + n.Name);
+            //    File.AppendAllText("ptz.txt", string.Format("\nPTZ node - Name: {0}, Presets: {1}", n.Name, n.MaximumNumberOfPresets));
+            //}
 
-                //foreach (OnvifPtzServiceReference.PTZNode n in nodes)
-                //{
-                //    lbxCapabilities.Items.Add("PTZ " + n.Name);
-                //    File.AppendAllText("ptz.txt", string.Format("\nPTZ node - Name: {0}, Presets: {1}", n.Name, n.MaximumNumberOfPresets));
-                //}
+            // Fails if not a PTZ
+            OnvifPtzServiceReference.PTZNode node = ptzService.GetNode("1"); // nodes[0].token);
 
-                // Fails if not a PTZ
-                OnvifPtzServiceReference.PTZNode node = ptzService.GetNode("1"); // nodes[0].token);
+            PTZConfiguration[] ptzConfigs = ptzService.GetConfigurations();
+            File.AppendAllText("ptz.txt", string.Format("\nPTZ configs found: {0}", ptzConfigs.Length));
+            File.AppendAllText("ptz.txt", string.Format("\nPTZ config - Name: {0}", ptzConfigs[0].Name));
+            File.AppendAllText("ptz.txt", string.Format("\nPTZ config - Token: {0}", ptzConfigs[0].token));
 
-                PTZConfiguration[] ptzConfigs = ptzService.GetConfigurations();
-                File.AppendAllText("ptz.txt", string.Format("\nPTZ configs found: {0}", ptzConfigs.Length));
-                File.AppendAllText("ptz.txt", string.Format("\nPTZ config - Name: {0}", ptzConfigs[0].Name));
-                File.AppendAllText("ptz.txt", string.Format("\nPTZ config - Token: {0}", ptzConfigs[0].token));
+            try
+            {
+                //PTZConfigurationOptions ptzOptions = ptz.GetConfigurationOptions(ptzConfigs[0].token);
+                //File.AppendAllText("ptz.txt", string.Format("\nPTZ options - Direction: {0}, ContinuousPanTiltVelocitySpace: {1}", ptzOptions?.PTControlDirection?.Reverse, ptzOptions?.Spaces?.ContinuousPanTiltVelocitySpace[0].XRange.Max));
+                //File.AppendAllText("ptz.txt", string.Format("\nPTZ options - ContinuousZoomVelocitySpace.URI: {0}", ptzOptions.Spaces.ContinuousZoomVelocitySpace[0].URI));
+
+                // Add PTZ config to Media profile
+                //mediaClient.AddPTZConfiguration("Profile1", ptzConfigs[0].token);
 
                 try
                 {
-                    //PTZConfigurationOptions ptzOptions = ptz.GetConfigurationOptions(ptzConfigs[0].token);
-                    //File.AppendAllText("ptz.txt", string.Format("\nPTZ options - Direction: {0}, ContinuousPanTiltVelocitySpace: {1}", ptzOptions?.PTControlDirection?.Reverse, ptzOptions?.Spaces?.ContinuousPanTiltVelocitySpace[0].XRange.Max));
-                    //File.AppendAllText("ptz.txt", string.Format("\nPTZ options - ContinuousZoomVelocitySpace.URI: {0}", ptzOptions.Spaces.ContinuousZoomVelocitySpace[0].URI));
+                    PTZSpeed velocity = new PTZSpeed();
+                    File.AppendAllText("ptz.txt", string.Format("\nSetting velocity"));
 
-                    // Add PTZ config to Media profile
-                    //mediaClient.AddPTZConfiguration("Profile1", ptzConfigs[0].token);
+                    //velocity.Zoom = new Vector1D() { x = ptzOptions.Spaces.ContinuousPanTiltVelocitySpace[0].XRange.Max, space = ptzOptions.Spaces.ContinuousZoomVelocitySpace[0].URI }; ;
+                    velocity.PanTilt = new Vector2D() { x = (float)-0.5, y = 0 }; ;
+                    //File.AppendAllText("ptz.txt", string.Format("\nXRange.Max = {0}", velocity.Zoom.x));
+                    //File.AppendAllText("ptz.txt", string.Format("\nContinuousZoomVelocitySpace[0].URI = {0}", velocity.Zoom.space));
 
-                    try
-                    {
-                        PTZSpeed velocity = new PTZSpeed();
-                        File.AppendAllText("ptz.txt", string.Format("\nSetting velocity"));
+                    ptzService.GotoPreset(profileToken, presets[presets.Length - 1].token, velocity);
 
-                        //velocity.Zoom = new Vector1D() { x = ptzOptions.Spaces.ContinuousPanTiltVelocitySpace[0].XRange.Max, space = ptzOptions.Spaces.ContinuousZoomVelocitySpace[0].URI }; ;
-                        velocity.PanTilt = new Vector2D() { x = (float)-0.5, y = 0 }; ;
-                        //File.AppendAllText("ptz.txt", string.Format("\nXRange.Max = {0}", velocity.Zoom.x));
-                        //File.AppendAllText("ptz.txt", string.Format("\nContinuousZoomVelocitySpace[0].URI = {0}", velocity.Zoom.space));
+                    //PtzContinuousMove(ptzService, mediaService, profileToken, 100);
 
-                        ptzService.GotoPreset(profileToken, presets[presets.Length - 1].token, velocity);
 
-                        //ptz.ContinuousMove(profileToken, velocity, "");
-                        //ptz.GotoHomePosition(profileToken, velocity);
-
-                        ptzService.Stop(profileToken, true, false);
-                    }
-                    catch (Exception ex)
-                    {
-                        File.AppendAllText("ptz.txt", string.Format("\nException trying to PTZ:\n\t{0}\n\tStack Trace: {1}", ex.Message, ex.StackTrace));
-                        if (ex.InnerException != null)
-                            File.AppendAllText("ptz.txt", string.Format("\n\tInner Exception: {0}", ex.InnerException));
-                        throw;
-                    }
-
+                    //ptz.GotoHomePosition(profileToken, velocity);
+                    //ptzService.Stop(profileToken, true, false);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
+                    File.AppendAllText("ptz.txt", string.Format("\nException trying to PTZ:\n\t{0}\n\tStack Trace: {1}", ex.Message, ex.StackTrace));
+                    if (ex.InnerException != null)
+                        File.AppendAllText("ptz.txt", string.Format("\n\tInner Exception: {0}", ex.InnerException));
                     throw;
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
+                throw;
+            }
+        }
+
+        private void UpdatePtzLocation(PTZClient ptzClient, string profileToken)
+        {
+            // Get Status
+            PTZStatus status = ptzClient.GetStatus(profileToken);
+            lblPtzLocationX.Text = "x: " + status.Position.PanTilt.x.ToString();
+            lblPtzLocationY.Text = "y: " + status.Position.PanTilt.y.ToString();
+            lblPtzLocationZoom.Text = "zoom: " + status.Position.Zoom.x.ToString();
+        }
+
+        private void PtzContinuousMove(PTZClient ptzService, OnvifMediaServiceReference.MediaClient mediaService, string profileToken, int stopTimeMs)
+        {
+            OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
+
+            PTZConfigurationOptions ptzConfigurationOptions = ptzService.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
+            
+            PTZSpeed velocity = new PTZSpeed();
+            velocity.PanTilt = new Vector2D()
+            {
+                x = ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].XRange.Max,
+                y = 0, //(float)-0.25, //ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].YRange.Max,
+                //space = ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].URI
+            };
+
+            ptzService.ContinuousMove(profileToken, velocity, null);
+            System.Threading.Thread.Sleep(250);
+            ptzService.Stop(profileToken, false, false);
+        }
+
+        private void PtzPan(float speed)
+        {
+            PTZClient ptzService = GetOnvifPTZClient(IP, Port);
+            OnvifMediaServiceReference.MediaClient mediaService = GetOnvifMediaClient(IP, Port);
+            string profileToken = "0";
+            int stopTimeMs = (int)numCmdDuration.Value;
+
+            OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
+            PTZConfigurationOptions ptzConfigurationOptions = ptzService.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
+
+            PTZSpeed velocity = new PTZSpeed();
+            velocity.PanTilt = new Vector2D() { x = speed * ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].XRange.Max, y = 0 };
+
+            ptzService.ContinuousMove(profileToken, velocity, null);
+            //System.Threading.Thread.Sleep(stopTimeMs);
+            //ptzService.Stop(profileToken, false, false);
+
+            UpdatePtzLocation(ptzService, profileToken);
+        }
+
+        private void PtzTilt(float speed)
+        {
+            PTZClient ptzService = GetOnvifPTZClient(IP, Port);
+            OnvifMediaServiceReference.MediaClient mediaService = GetOnvifMediaClient(IP, Port);
+            string profileToken = "0";
+
+            OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
+            PTZConfigurationOptions ptzConfigurationOptions = ptzService.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
+
+            PTZSpeed velocity = new PTZSpeed();
+            velocity.PanTilt = new Vector2D() { x = 0, y = speed * ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].YRange.Max };
+
+            ptzService.ContinuousMove(profileToken, velocity, null);
+            UpdatePtzLocation(ptzService, profileToken);
+        }
+
+        private void PtzZoom(float speed)
+        {
+            PTZClient ptzService = GetOnvifPTZClient(IP, Port);
+            OnvifMediaServiceReference.MediaClient mediaService = GetOnvifMediaClient(IP, Port);
+            string profileToken = "0";
+
+            OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
+            PTZConfigurationOptions ptzConfigurationOptions = ptzService.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
+
+            PTZSpeed velocity = new PTZSpeed();
+            velocity.Zoom = new Vector1D() { x = speed * ptzConfigurationOptions.Spaces.ContinuousZoomVelocitySpace[0].XRange.Max };
+
+            ptzService.ContinuousMove(profileToken, velocity, null);
+            UpdatePtzLocation(ptzService, profileToken);
+        }
+
+        private void PtzStop()
+        {
+            using (PTZClient ptzService = GetOnvifPTZClient(IP, Port))
+            {
+                string profileToken = "0";
+                ptzService.Stop(profileToken, true, true);
             }
         }
 
@@ -265,6 +390,111 @@ namespace Onvif_Interface
             PTZClient ptzClient = new PTZClient(bind, serviceAddress);
 
             return ptzClient;
+        }
+
+        private void btnSetConnectInfo_Click(object sender, EventArgs e)
+        {
+            IP = txtIP.Text;
+            Port = (int)numPort.Value;
+        }
+
+        //private void btnPanLeft_Click(object sender, EventArgs e)
+        //{
+        //    PtzPan((float)-0.5);
+        //}
+
+        private void BtnPanLeft_MouseDown(object sender, MouseEventArgs e)
+        {
+            float speed = (float)numPtzCmdSpeed.Value / 100;
+            PtzPan(-speed);
+        }
+
+        //private void btnPanRight_Click(object sender, EventArgs e)
+        //{
+        //    PtzPan((float)0.5);
+        //}
+
+        private void BtnPanRight_MouseDown(object sender, MouseEventArgs e)
+        {
+            float speed = (float)numPtzCmdSpeed.Value / 100;
+            PtzPan(speed);
+        }
+
+        //private void btnTiltUp_Click(object sender, EventArgs e)
+        //{
+        //    PtzTilt((float)0.5);
+        //}
+
+        private void BtnTiltUp_MouseDown(object sender, MouseEventArgs e)
+        {
+            float speed = (float)numPtzCmdSpeed.Value / 100;
+            PtzTilt(speed);
+        }
+
+        //private void btnTiltDown_Click(object sender, EventArgs e)
+        //{
+        //    PtzTilt((float)-0.5);
+        //}
+
+        private void BtnTiltDown_MouseDown(object sender, MouseEventArgs e)
+        {
+            float speed = (float)numPtzCmdSpeed.Value / 100;
+            PtzTilt(-speed);
+        }
+
+        //private void btnZoomIn_Click(object sender, EventArgs e)
+        //{
+        //    float speed = (float)numPtzCmdSpeed.Value / 100;
+        //    PtzZoom(speed);
+        //}
+
+        //private void btnZoomOut_Click(object sender, EventArgs e)
+        //{
+        //    float speed = (float)numPtzCmdSpeed.Value / 100;
+        //    PtzZoom(-speed);
+        //}
+
+        private void BtnZoomOut_MouseDown(object sender, MouseEventArgs e)
+        {
+            float speed = (float)numPtzCmdSpeed.Value / 100;
+            PtzZoom(-speed);
+        }
+
+        private void BtnZoomIn_MouseDown(object sender, MouseEventArgs e)
+        {
+            float speed = (float)numPtzCmdSpeed.Value / 100;
+            PtzZoom(speed);
+        }
+
+        // Ptz stop commands
+        private void BtnTiltUp_MouseUp(object sender, MouseEventArgs e)
+        {
+            PtzStop();
+        }
+
+        private void BtnTiltDown_MouseUp(object sender, MouseEventArgs e)
+        {
+            PtzStop();
+        }
+
+        private void BtnPanRight_MouseUp(object sender, MouseEventArgs e)
+        {
+            PtzStop();
+        }
+
+        private void BtnPanLeft_MouseUp(object sender, MouseEventArgs e)
+        {
+            PtzStop();
+        }
+
+        private void BtnZoomOut_MouseUp(object sender, MouseEventArgs e)
+        {
+            PtzStop();
+        }
+
+        private void BtnZoomIn_MouseUp(object sender, MouseEventArgs e)
+        {
+            PtzStop();
         }
     }
 }
