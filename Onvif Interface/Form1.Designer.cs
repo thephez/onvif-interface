@@ -58,6 +58,12 @@
             this.btnTiltDown = new System.Windows.Forms.Button();
             this.btnTiltUp = new System.Windows.Forms.Button();
             this.btnSetConnectInfo = new System.Windows.Forms.Button();
+            this.btnPreset1 = new System.Windows.Forms.Button();
+            this.btnPreset2 = new System.Windows.Forms.Button();
+            this.btnPreset3 = new System.Windows.Forms.Button();
+            this.btnPreset4 = new System.Windows.Forms.Button();
+            this.btnPreset5 = new System.Windows.Forms.Button();
+            this.lblPreset = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.gbxDeviceInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -209,6 +215,12 @@
             // 
             this.gbxPtzControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+            this.gbxPtzControl.Controls.Add(this.lblPreset);
+            this.gbxPtzControl.Controls.Add(this.btnPreset5);
+            this.gbxPtzControl.Controls.Add(this.btnPreset4);
+            this.gbxPtzControl.Controls.Add(this.btnPreset3);
+            this.gbxPtzControl.Controls.Add(this.btnPreset2);
+            this.gbxPtzControl.Controls.Add(this.btnPreset1);
             this.gbxPtzControl.Controls.Add(this.numPtzCmdSpeed);
             this.gbxPtzControl.Controls.Add(this.lblCmdSpeed);
             this.gbxPtzControl.Controls.Add(this.lblPtzLocationZoom);
@@ -262,7 +274,7 @@
             // lblPtzLocationZoom
             // 
             this.lblPtzLocationZoom.AutoSize = true;
-            this.lblPtzLocationZoom.Location = new System.Drawing.Point(180, 165);
+            this.lblPtzLocationZoom.Location = new System.Drawing.Point(194, 165);
             this.lblPtzLocationZoom.Name = "lblPtzLocationZoom";
             this.lblPtzLocationZoom.Size = new System.Drawing.Size(85, 13);
             this.lblPtzLocationZoom.TabIndex = 12;
@@ -271,7 +283,7 @@
             // lblPtzLocationY
             // 
             this.lblPtzLocationY.AutoSize = true;
-            this.lblPtzLocationY.Location = new System.Drawing.Point(180, 147);
+            this.lblPtzLocationY.Location = new System.Drawing.Point(194, 147);
             this.lblPtzLocationY.Name = "lblPtzLocationY";
             this.lblPtzLocationY.Size = new System.Drawing.Size(65, 13);
             this.lblPtzLocationY.TabIndex = 11;
@@ -280,7 +292,7 @@
             // lblPtzLocationX
             // 
             this.lblPtzLocationX.AutoSize = true;
-            this.lblPtzLocationX.Location = new System.Drawing.Point(180, 130);
+            this.lblPtzLocationX.Location = new System.Drawing.Point(194, 130);
             this.lblPtzLocationX.Name = "lblPtzLocationX";
             this.lblPtzLocationX.Size = new System.Drawing.Size(65, 13);
             this.lblPtzLocationX.TabIndex = 10;
@@ -289,7 +301,7 @@
             // lblPtzLocation
             // 
             this.lblPtzLocation.AutoSize = true;
-            this.lblPtzLocation.Location = new System.Drawing.Point(173, 111);
+            this.lblPtzLocation.Location = new System.Drawing.Point(187, 111);
             this.lblPtzLocation.Name = "lblPtzLocation";
             this.lblPtzLocation.Size = new System.Drawing.Size(72, 13);
             this.lblPtzLocation.TabIndex = 9;
@@ -326,7 +338,7 @@
             // lblCmdDuration
             // 
             this.lblCmdDuration.AutoSize = true;
-            this.lblCmdDuration.Location = new System.Drawing.Point(6, 137);
+            this.lblCmdDuration.Location = new System.Drawing.Point(121, 11);
             this.lblCmdDuration.Name = "lblCmdDuration";
             this.lblCmdDuration.Size = new System.Drawing.Size(97, 13);
             this.lblCmdDuration.TabIndex = 5;
@@ -335,7 +347,7 @@
             // 
             // numCmdDuration
             // 
-            this.numCmdDuration.Location = new System.Drawing.Point(105, 135);
+            this.numCmdDuration.Location = new System.Drawing.Point(224, 9);
             this.numCmdDuration.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -404,6 +416,60 @@
             this.btnSetConnectInfo.UseVisualStyleBackColor = true;
             this.btnSetConnectInfo.Click += new System.EventHandler(this.btnSetConnectInfo_Click);
             // 
+            // btnPreset1
+            // 
+            this.btnPreset1.Location = new System.Drawing.Point(23, 153);
+            this.btnPreset1.Name = "btnPreset1";
+            this.btnPreset1.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset1.TabIndex = 15;
+            this.btnPreset1.Text = "1";
+            this.btnPreset1.UseVisualStyleBackColor = true;
+            // 
+            // btnPreset2
+            // 
+            this.btnPreset2.Location = new System.Drawing.Point(54, 153);
+            this.btnPreset2.Name = "btnPreset2";
+            this.btnPreset2.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset2.TabIndex = 16;
+            this.btnPreset2.Text = "2";
+            this.btnPreset2.UseVisualStyleBackColor = true;
+            // 
+            // btnPreset3
+            // 
+            this.btnPreset3.Location = new System.Drawing.Point(85, 153);
+            this.btnPreset3.Name = "btnPreset3";
+            this.btnPreset3.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset3.TabIndex = 17;
+            this.btnPreset3.Text = "3";
+            this.btnPreset3.UseVisualStyleBackColor = true;
+            // 
+            // btnPreset4
+            // 
+            this.btnPreset4.Location = new System.Drawing.Point(116, 153);
+            this.btnPreset4.Name = "btnPreset4";
+            this.btnPreset4.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset4.TabIndex = 18;
+            this.btnPreset4.Text = "4";
+            this.btnPreset4.UseVisualStyleBackColor = true;
+            // 
+            // btnPreset5
+            // 
+            this.btnPreset5.Location = new System.Drawing.Point(147, 153);
+            this.btnPreset5.Name = "btnPreset5";
+            this.btnPreset5.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset5.TabIndex = 19;
+            this.btnPreset5.Text = "5";
+            this.btnPreset5.UseVisualStyleBackColor = true;
+            // 
+            // lblPreset
+            // 
+            this.lblPreset.AutoSize = true;
+            this.lblPreset.Location = new System.Drawing.Point(6, 137);
+            this.lblPreset.Name = "lblPreset";
+            this.lblPreset.Size = new System.Drawing.Size(42, 13);
+            this.lblPreset.TabIndex = 20;
+            this.lblPreset.Text = "Presets";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -463,6 +529,12 @@
         private System.Windows.Forms.Button btnSetConnectInfo;
         private System.Windows.Forms.NumericUpDown numPtzCmdSpeed;
         private System.Windows.Forms.Label lblCmdSpeed;
+        private System.Windows.Forms.Button btnPreset5;
+        private System.Windows.Forms.Button btnPreset4;
+        private System.Windows.Forms.Button btnPreset3;
+        private System.Windows.Forms.Button btnPreset2;
+        private System.Windows.Forms.Button btnPreset1;
+        private System.Windows.Forms.Label lblPreset;
     }
 }
 
