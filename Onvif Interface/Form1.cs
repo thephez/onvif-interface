@@ -73,19 +73,7 @@ namespace Onvif_Interface
 
         private void GetOnvifInfo(string ip, int port = 80)
         {
-            EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/device_service", ip, port));
-
-            HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
-            httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
-
-            var messageElement = new TextMessageEncodingBindingElement();
-            messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
-            CustomBinding bind = new CustomBinding(messageElement, httpBinding);
-
-            // Add our custom behavior - this require the Microsoft WSE 3.0 SDK
-            //PasswordDigestBehavior behavior = new PasswordDigestBehavior(CameraASCIIStringLogin, CameraASCIIStringPassword);
-
-            using (DeviceClient client = new DeviceClient(bind, serviceAddress))
+            using (DeviceClient client = OnvifServices.GetOnvifDeviceClient(ip, port)) // new DeviceClient(bind, serviceAddress))
             {
                 client.Endpoint.Behaviors.Add(new EndpointDiscoveryBehavior());
 
@@ -153,17 +141,17 @@ namespace Onvif_Interface
 
         private void GetServices(DeviceClient client)
         {
-            // GetCapabilities is now deprecated - replaced by GetServices
-            //OnvifDeviceManagementServiceReference.Capabilities capabilities = client.GetCapabilities(new CapabilityCategory[] { CapabilityCategory.All });
+            // GetCapabilities is now deprecated (as of v2.1) - replaced by GetServices (Older devices may still use)
+            OnvifDeviceManagementServiceReference.Capabilities capabilities = client.GetCapabilities(new CapabilityCategory[] { CapabilityCategory.All });
 
-            //if (capabilities.Analytics != null) { lbxCapabilities.Items.Add("Analytics"); }
-            //if (capabilities.Events != null) { lbxCapabilities.Items.Add("Events"); }
-            //if (capabilities.Extension != null) { lbxCapabilities.Items.Add("Extension"); }
-            //if (capabilities.Imaging != null) { lbxCapabilities.Items.Add("Imaging"); }
-            //if (capabilities.Media != null) { lbxCapabilities.Items.Add("Media"); }
-            //if (capabilities.PTZ != null) { lbxCapabilities.Items.Add("PTZ"); }
+            if (capabilities.Analytics != null) { lbxCapabilities.Items.Add("Analytics"); }
+            if (capabilities.Events != null) { lbxCapabilities.Items.Add("Events"); }
+            if (capabilities.Extension != null) { lbxCapabilities.Items.Add("Extension"); }
+            if (capabilities.Imaging != null) { lbxCapabilities.Items.Add("Imaging"); }
+            if (capabilities.Media != null) { lbxCapabilities.Items.Add("Media"); }
+            if (capabilities.PTZ != null) { lbxCapabilities.Items.Add("PTZ"); }
 
-            //lbxCapabilities.Items.Add("");
+            lbxCapabilities.Items.Add("");
 
             Service[] svc = client.GetServices(IncludeCapability: true);
             foreach (Service s in svc)
@@ -191,10 +179,10 @@ namespace Onvif_Interface
         private void PTZTest(DeviceClient client, string ip, int port)
         {
             // Create Media object
-            OnvifMediaServiceReference.MediaClient mediaService = GetOnvifMediaClient(ip, port);
+            OnvifMediaServiceReference.MediaClient mediaService = OnvifServices.GetOnvifMediaClient(ip, port);
 
             // Create PTZ object
-            PTZClient ptzService = GetOnvifPTZClient(ip, port); // new PTZClient(client.Endpoint.Binding, client.Endpoint.Address);
+            PTZClient ptzService = OnvifServices.GetOnvifPTZClient(ip, port); // new PTZClient(client.Endpoint.Binding, client.Endpoint.Address);
 
             lbxPtzInfo.Items.Add("Supported Operations");
             foreach (OperationDescription odc in ptzService.Endpoint.Contract.Operations)
@@ -208,16 +196,24 @@ namespace Onvif_Interface
             OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
 
             // Get Presets
-            PTZPreset[] presets = ptzService.GetPresets(profileToken);
-            lbxPtzInfo.Items.Add("");
-            lbxPtzInfo.Items.Add("Presets");
-            foreach (PTZPreset p in presets)
+            try
             {
-                lbxPtzInfo.Items.Add(string.Format("  Preset {0} ({1}) @ {2}:{3} {4}", p.Name, p.token, p.PTZPosition.PanTilt.x, p.PTZPosition.PanTilt.y, p.PTZPosition.Zoom.x));
+                PTZPreset[] presets = ptzService.GetPresets(profileToken);
+                lbxPtzInfo.Items.Add("");
+                lbxPtzInfo.Items.Add("Presets");
+                foreach (PTZPreset p in presets)
+                {
+                    lbxPtzInfo.Items.Add(string.Format("  Preset {0} ({1}) @ {2}:{3} {4}", p.Name, p.token, p.PTZPosition.PanTilt.x, p.PTZPosition.PanTilt.y, p.PTZPosition.Zoom.x));
+                }
+
+                UpdatePtzLocation(ptzService, profileToken);
             }
-
-            UpdatePtzLocation(ptzService, profileToken);
-
+            catch (Exception ex)
+            {
+                tssLbl.Text = "Unable to get presets and update location: " + ex.Message;
+                throw;
+            }
+            
             //// Get Nodes
             //OnvifPtzServiceReference.PTZNode[] nodes = ptz.GetNodes();
             //Console.WriteLine(nodes.Length);
@@ -248,7 +244,7 @@ namespace Onvif_Interface
 
                     //velocity.Zoom = new Vector1D() { x = ptzOptions.Spaces.ContinuousPanTiltVelocitySpace[0].XRange.Max, space = ptzOptions.Spaces.ContinuousZoomVelocitySpace[0].URI }; ;
                     velocity.PanTilt = new Vector2D() { x = (float)-0.5, y = 0 }; ;
-                    ptzService.GotoPreset(profileToken, presets[presets.Length - 1].token, velocity);
+                    //ptzService.GotoPreset(profileToken, presets[presets.Length - 1].token, velocity);
 
                     //PtzContinuousMove(ptzService, mediaService, profileToken, 100);
                     //ptz.GotoHomePosition(profileToken, velocity);
@@ -308,43 +304,6 @@ namespace Onvif_Interface
         {
             OnvifPtz ptz = new OnvifPtz(IP, Port);
             ptz.Stop();
-            //using (PTZClient ptzService = GetOnvifPTZClient(IP, Port))
-            //{
-            //    string profileToken = "0";
-            //    ptzService.Stop(profileToken, true, true);
-            //}
-        }
-
-        private OnvifMediaServiceReference.MediaClient GetOnvifMediaClient(string ip, int port)
-        {
-            EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/media_service", ip, port));
-
-            HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
-            httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
-
-            var messageElement = new TextMessageEncodingBindingElement();
-            messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
-            CustomBinding bind = new CustomBinding(messageElement, httpBinding);
-
-            OnvifMediaServiceReference.MediaClient mediaClient = new OnvifMediaServiceReference.MediaClient(bind, serviceAddress);
-
-            return mediaClient;
-        }
-
-        private PTZClient GetOnvifPTZClient(string ip, int port)
-        {
-            EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/ptz_service", ip, port));
-
-            HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
-            httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
-
-            var messageElement = new TextMessageEncodingBindingElement();
-            messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
-            CustomBinding bind = new CustomBinding(messageElement, httpBinding);
-
-            PTZClient ptzClient = new PTZClient(bind, serviceAddress);
-
-            return ptzClient;
         }
 
         private void btnSetConnectInfo_Click(object sender, EventArgs e)
@@ -406,9 +365,16 @@ namespace Onvif_Interface
         {
             Button btn = (Button)sender;
             OnvifPtz ptz = new OnvifPtz(IP, Port);
-            ptz.ShowPreset("0", btn.Text);
-            Console.WriteLine(string.Format("Moving to preset {0}", btn.Text));
-            UpdatePtzLocation(ptz.GetPtzLocation());
+            try
+            {
+                ptz.ShowPreset("0", btn.Text);
+                Console.WriteLine(string.Format("Moving to preset {0}", btn.Text));
+                UpdatePtzLocation(ptz.GetPtzLocation());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
         }
         
         // Ptz stop commands

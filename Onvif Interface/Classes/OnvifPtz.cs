@@ -1,5 +1,6 @@
 ﻿using Onvif_Interface.OnvifPtzServiceReference;
 using System;
+using System.Runtime.Serialization;
 
 namespace SDS.Video.Onvif
 {
@@ -32,6 +33,7 @@ namespace SDS.Video.Onvif
         public void Pan(float speed, string profileToken = "0")
         {
             Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
+
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
             PTZSpeed velocity = new PTZSpeed();
@@ -69,10 +71,29 @@ namespace SDS.Video.Onvif
 
         public void ShowPreset(string profileToken, string presetToken)
         {
-            PTZSpeed velocity = new PTZSpeed();
-            velocity.PanTilt = new Vector2D() { x = (float)-0.5, y = 0 }; ;
+            if (IsValidPresetToken(profileToken, presetToken))
+            {
+                PTZSpeed velocity = new PTZSpeed();
+                velocity.PanTilt = new Vector2D() { x = (float)-0.5, y = 0 }; ;
 
-            PtzClient.GotoPreset(profileToken, presetToken, velocity);
+                PtzClient.GotoPreset(profileToken, presetToken, velocity);
+            }
+            else
+            {
+                throw new Exception(string.Format("Invalid Preset requsted - preset token {0}", presetToken));
+            }
+        }
+
+        public bool IsValidPresetToken(string profileToken, string presetToken)
+        {
+            PTZPreset[] presets = PtzClient.GetPresets(profileToken);
+            foreach (PTZPreset p in presets)
+            {
+                if (p.token == presetToken)
+                    return true;
+            }
+
+            return false;
         }
 
         public PTZStatus GetPtzLocation(string profileToken = "0")
