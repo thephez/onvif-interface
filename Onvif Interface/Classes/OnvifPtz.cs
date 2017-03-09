@@ -34,7 +34,8 @@ namespace SDS.Video.Onvif
 
         public void Pan(float speed, string profileToken = "0")
         {
-            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
+            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(mediaProfiles[0].token); // profileToken);
 
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
@@ -46,7 +47,8 @@ namespace SDS.Video.Onvif
 
         public void Tilt(float speed, string profileToken = "0")
         {
-            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
+            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(mediaProfiles[0].token); // profileToken);
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
             PTZSpeed velocity = new PTZSpeed();
@@ -57,7 +59,8 @@ namespace SDS.Video.Onvif
 
         public void Zoom(float speed, string profileToken = "0")
         {
-            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
+            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(mediaProfiles[0].token); // profileToken);
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
             PTZSpeed velocity = new PTZSpeed();
@@ -68,11 +71,16 @@ namespace SDS.Video.Onvif
 
         public void Stop(string profileToken = "0")
         {
+            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
+            profileToken = mediaProfiles[0].token;
             PtzClient.Stop(profileToken, true, true);
         }
 
         public void ShowPreset(string profileToken, string presetToken)
         {
+            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
+            profileToken = mediaProfiles[0].token;
+
             if (IsValidPresetToken(profileToken, presetToken))
             {
                 PTZSpeed velocity = new PTZSpeed();
@@ -100,6 +108,9 @@ namespace SDS.Video.Onvif
 
         public PTZStatus GetPtzLocation(string profileToken = "0")
         {
+            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
+            profileToken = mediaProfiles[0].token;
+
             PTZStatus status = PtzClient.GetStatus(profileToken);
             return status;
         }
