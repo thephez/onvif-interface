@@ -42,6 +42,12 @@
             this.lbxCapabilities = new System.Windows.Forms.ListBox();
             this.numPort = new System.Windows.Forms.NumericUpDown();
             this.gbxPtzControl = new System.Windows.Forms.GroupBox();
+            this.lblPreset = new System.Windows.Forms.Label();
+            this.btnPreset5 = new System.Windows.Forms.Button();
+            this.btnPreset4 = new System.Windows.Forms.Button();
+            this.btnPreset3 = new System.Windows.Forms.Button();
+            this.btnPreset2 = new System.Windows.Forms.Button();
+            this.btnPreset1 = new System.Windows.Forms.Button();
             this.numPtzCmdSpeed = new System.Windows.Forms.NumericUpDown();
             this.lblCmdSpeed = new System.Windows.Forms.Label();
             this.lblPtzLocationZoom = new System.Windows.Forms.Label();
@@ -58,12 +64,12 @@
             this.btnTiltDown = new System.Windows.Forms.Button();
             this.btnTiltUp = new System.Windows.Forms.Button();
             this.btnSetConnectInfo = new System.Windows.Forms.Button();
-            this.btnPreset1 = new System.Windows.Forms.Button();
-            this.btnPreset2 = new System.Windows.Forms.Button();
-            this.btnPreset3 = new System.Windows.Forms.Button();
-            this.btnPreset4 = new System.Windows.Forms.Button();
-            this.btnPreset5 = new System.Windows.Forms.Button();
-            this.lblPreset = new System.Windows.Forms.Label();
+            this.txtUser = new System.Windows.Forms.TextBox();
+            this.txtPassword = new System.Windows.Forms.TextBox();
+            this.lblIP = new System.Windows.Forms.Label();
+            this.lblPort = new System.Windows.Forms.Label();
+            this.lblUser = new System.Windows.Forms.Label();
+            this.lblPassword = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.gbxDeviceInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -84,7 +90,7 @@
             // 
             // txtIP
             // 
-            this.txtIP.Location = new System.Drawing.Point(37, 21);
+            this.txtIP.Location = new System.Drawing.Point(12, 37);
             this.txtIP.Name = "txtIP";
             this.txtIP.Size = new System.Drawing.Size(110, 20);
             this.txtIP.TabIndex = 0;
@@ -191,7 +197,7 @@
             // 
             // numPort
             // 
-            this.numPort.Location = new System.Drawing.Point(154, 21);
+            this.numPort.Location = new System.Drawing.Point(129, 37);
             this.numPort.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -205,6 +211,7 @@
             this.numPort.Name = "numPort";
             this.numPort.Size = new System.Drawing.Size(66, 20);
             this.numPort.TabIndex = 1;
+            this.numPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numPort.Value = new decimal(new int[] {
             8251,
             0,
@@ -242,6 +249,60 @@
             this.gbxPtzControl.TabIndex = 9;
             this.gbxPtzControl.TabStop = false;
             this.gbxPtzControl.Text = "PTZ Control";
+            // 
+            // lblPreset
+            // 
+            this.lblPreset.AutoSize = true;
+            this.lblPreset.Location = new System.Drawing.Point(6, 137);
+            this.lblPreset.Name = "lblPreset";
+            this.lblPreset.Size = new System.Drawing.Size(42, 13);
+            this.lblPreset.TabIndex = 20;
+            this.lblPreset.Text = "Presets";
+            // 
+            // btnPreset5
+            // 
+            this.btnPreset5.Location = new System.Drawing.Point(147, 153);
+            this.btnPreset5.Name = "btnPreset5";
+            this.btnPreset5.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset5.TabIndex = 19;
+            this.btnPreset5.Text = "5";
+            this.btnPreset5.UseVisualStyleBackColor = true;
+            // 
+            // btnPreset4
+            // 
+            this.btnPreset4.Location = new System.Drawing.Point(116, 153);
+            this.btnPreset4.Name = "btnPreset4";
+            this.btnPreset4.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset4.TabIndex = 18;
+            this.btnPreset4.Text = "4";
+            this.btnPreset4.UseVisualStyleBackColor = true;
+            // 
+            // btnPreset3
+            // 
+            this.btnPreset3.Location = new System.Drawing.Point(85, 153);
+            this.btnPreset3.Name = "btnPreset3";
+            this.btnPreset3.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset3.TabIndex = 17;
+            this.btnPreset3.Text = "3";
+            this.btnPreset3.UseVisualStyleBackColor = true;
+            // 
+            // btnPreset2
+            // 
+            this.btnPreset2.Location = new System.Drawing.Point(54, 153);
+            this.btnPreset2.Name = "btnPreset2";
+            this.btnPreset2.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset2.TabIndex = 16;
+            this.btnPreset2.Text = "2";
+            this.btnPreset2.UseVisualStyleBackColor = true;
+            // 
+            // btnPreset1
+            // 
+            this.btnPreset1.Location = new System.Drawing.Point(23, 153);
+            this.btnPreset1.Name = "btnPreset1";
+            this.btnPreset1.Size = new System.Drawing.Size(25, 25);
+            this.btnPreset1.TabIndex = 15;
+            this.btnPreset1.Text = "1";
+            this.btnPreset1.UseVisualStyleBackColor = true;
             // 
             // numPtzCmdSpeed
             // 
@@ -408,7 +469,7 @@
             // 
             // btnSetConnectInfo
             // 
-            this.btnSetConnectInfo.Location = new System.Drawing.Point(37, 47);
+            this.btnSetConnectInfo.Location = new System.Drawing.Point(12, 63);
             this.btnSetConnectInfo.Name = "btnSetConnectInfo";
             this.btnSetConnectInfo.Size = new System.Drawing.Size(109, 30);
             this.btnSetConnectInfo.TabIndex = 10;
@@ -416,65 +477,69 @@
             this.btnSetConnectInfo.UseVisualStyleBackColor = true;
             this.btnSetConnectInfo.Click += new System.EventHandler(this.btnSetConnectInfo_Click);
             // 
-            // btnPreset1
+            // txtUser
             // 
-            this.btnPreset1.Location = new System.Drawing.Point(23, 153);
-            this.btnPreset1.Name = "btnPreset1";
-            this.btnPreset1.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset1.TabIndex = 15;
-            this.btnPreset1.Text = "1";
-            this.btnPreset1.UseVisualStyleBackColor = true;
+            this.txtUser.Location = new System.Drawing.Point(12, 125);
+            this.txtUser.Name = "txtUser";
+            this.txtUser.Size = new System.Drawing.Size(110, 20);
+            this.txtUser.TabIndex = 11;
+            this.txtUser.Text = "onvif";
             // 
-            // btnPreset2
+            // txtPassword
             // 
-            this.btnPreset2.Location = new System.Drawing.Point(54, 153);
-            this.btnPreset2.Name = "btnPreset2";
-            this.btnPreset2.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset2.TabIndex = 16;
-            this.btnPreset2.Text = "2";
-            this.btnPreset2.UseVisualStyleBackColor = true;
+            this.txtPassword.Location = new System.Drawing.Point(12, 167);
+            this.txtPassword.Name = "txtPassword";
+            this.txtPassword.Size = new System.Drawing.Size(110, 20);
+            this.txtPassword.TabIndex = 12;
+            this.txtPassword.Text = "Sierra123";
             // 
-            // btnPreset3
+            // lblIP
             // 
-            this.btnPreset3.Location = new System.Drawing.Point(85, 153);
-            this.btnPreset3.Name = "btnPreset3";
-            this.btnPreset3.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset3.TabIndex = 17;
-            this.btnPreset3.Text = "3";
-            this.btnPreset3.UseVisualStyleBackColor = true;
+            this.lblIP.AutoSize = true;
+            this.lblIP.Location = new System.Drawing.Point(12, 21);
+            this.lblIP.Name = "lblIP";
+            this.lblIP.Size = new System.Drawing.Size(56, 13);
+            this.lblIP.TabIndex = 13;
+            this.lblIP.Text = "Camera IP";
             // 
-            // btnPreset4
+            // lblPort
             // 
-            this.btnPreset4.Location = new System.Drawing.Point(116, 153);
-            this.btnPreset4.Name = "btnPreset4";
-            this.btnPreset4.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset4.TabIndex = 18;
-            this.btnPreset4.Text = "4";
-            this.btnPreset4.UseVisualStyleBackColor = true;
+            this.lblPort.AutoSize = true;
+            this.lblPort.Location = new System.Drawing.Point(126, 21);
+            this.lblPort.Name = "lblPort";
+            this.lblPort.Size = new System.Drawing.Size(65, 13);
+            this.lblPort.TabIndex = 14;
+            this.lblPort.Text = "Camera Port";
             // 
-            // btnPreset5
+            // lblUser
             // 
-            this.btnPreset5.Location = new System.Drawing.Point(147, 153);
-            this.btnPreset5.Name = "btnPreset5";
-            this.btnPreset5.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset5.TabIndex = 19;
-            this.btnPreset5.Text = "5";
-            this.btnPreset5.UseVisualStyleBackColor = true;
+            this.lblUser.AutoSize = true;
+            this.lblUser.Location = new System.Drawing.Point(12, 109);
+            this.lblUser.Name = "lblUser";
+            this.lblUser.Size = new System.Drawing.Size(29, 13);
+            this.lblUser.TabIndex = 15;
+            this.lblUser.Text = "User";
             // 
-            // lblPreset
+            // lblPassword
             // 
-            this.lblPreset.AutoSize = true;
-            this.lblPreset.Location = new System.Drawing.Point(6, 137);
-            this.lblPreset.Name = "lblPreset";
-            this.lblPreset.Size = new System.Drawing.Size(42, 13);
-            this.lblPreset.TabIndex = 20;
-            this.lblPreset.Text = "Presets";
+            this.lblPassword.AutoSize = true;
+            this.lblPassword.Location = new System.Drawing.Point(12, 151);
+            this.lblPassword.Name = "lblPassword";
+            this.lblPassword.Size = new System.Drawing.Size(53, 13);
+            this.lblPassword.TabIndex = 16;
+            this.lblPassword.Text = "Password";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(866, 556);
+            this.Controls.Add(this.lblPassword);
+            this.Controls.Add(this.lblUser);
+            this.Controls.Add(this.lblPort);
+            this.Controls.Add(this.lblIP);
+            this.Controls.Add(this.txtPassword);
+            this.Controls.Add(this.txtUser);
             this.Controls.Add(this.btnSetConnectInfo);
             this.Controls.Add(this.gbxPtzControl);
             this.Controls.Add(this.numPort);
@@ -535,6 +600,12 @@
         private System.Windows.Forms.Button btnPreset2;
         private System.Windows.Forms.Button btnPreset1;
         private System.Windows.Forms.Label lblPreset;
+        private System.Windows.Forms.TextBox txtUser;
+        private System.Windows.Forms.TextBox txtPassword;
+        private System.Windows.Forms.Label lblIP;
+        private System.Windows.Forms.Label lblPort;
+        private System.Windows.Forms.Label lblUser;
+        private System.Windows.Forms.Label lblPassword;
     }
 }
 

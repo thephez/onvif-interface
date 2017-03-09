@@ -75,26 +75,28 @@ namespace Onvif_Interface
 
         private void GetOnvifInfo(string ip, int port = 80)
         {
-            using (DeviceClient client = OnvifServices.GetOnvifDeviceClient(ip, port)) // new DeviceClient(bind, serviceAddress))
+            DeviceClient client = OnvifServices.GetOnvifDeviceClient(ip, port); //, "service", "Sierra123")) // new DeviceClient(bind, serviceAddress))
+            client.Endpoint.Behaviors.Add(new EndpointDiscoveryBehavior());
+
+            gbxPtzControl.Visible = true;
+
+            // We can now ask for information
+            // ONVIF application programmer guide (5.1.3) suggests checking time first 
+            // (no auth required) so time offset can be determined (needed for auth if applicable)
+            client = OnvifServices.GetOnvifDeviceClient(IP.ToString(), Port);
+            GetDeviceTime(client);
+
+            // Switch to an authenticated client if the username field contains something
+            if (txtUser.Text != string.Empty)
+                client = OnvifServices.GetOnvifDeviceClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
+            
+            GetDeviceInfo(client);
+            GetServices(client);
+
+            if (lbxCapabilities.Items.Contains("http://www.onvif.org/ver20/ptz/wsdl"))
             {
-                client.Endpoint.Behaviors.Add(new EndpointDiscoveryBehavior());
-
                 gbxPtzControl.Visible = true;
-
-                // We can now ask for information
-                // ONVIF application programmer guide (5.1.3) suggests checking time first 
-                // (no auth required) so time offset can be determined (needed for auth if applicable)
-                GetDeviceTime(client);
-
-                GetDeviceInfo(client);
-
-                GetServices(client);
-
-                if (lbxCapabilities.Items.Contains("http://www.onvif.org/ver20/ptz/wsdl"))
-                {
-                    gbxPtzControl.Visible = true;
-                    PTZTest(client, ip, port);
-                }
+                PTZTest(client, ip, port);
             }
         }
 
@@ -304,7 +306,7 @@ namespace Onvif_Interface
 
         private void PtzStop()
         {
-            OnvifPtz ptz = new OnvifPtz(IP, Port);
+            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             ptz.Stop();
         }
 
@@ -318,7 +320,7 @@ namespace Onvif_Interface
         private void BtnPanLeft_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port);
+            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             ptz.Pan(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -326,7 +328,7 @@ namespace Onvif_Interface
         private void BtnPanRight_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port);
+            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             ptz.Pan(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -334,7 +336,7 @@ namespace Onvif_Interface
         private void BtnTiltUp_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port);
+            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             ptz.Tilt(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -342,7 +344,7 @@ namespace Onvif_Interface
         private void BtnTiltDown_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port);
+            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             ptz.Tilt(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -350,7 +352,7 @@ namespace Onvif_Interface
         private void BtnZoomOut_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port);
+            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             ptz.Zoom(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -358,7 +360,7 @@ namespace Onvif_Interface
         private void BtnZoomIn_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port);
+            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             ptz.Zoom(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -366,7 +368,7 @@ namespace Onvif_Interface
         private void BtnPreset_Click(object sender, EventArgs e)
         {
             Button btn = (Button)sender;
-            OnvifPtz ptz = new OnvifPtz(IP, Port);
+            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             try
             {
                 ptz.ShowPreset("0", btn.Text);

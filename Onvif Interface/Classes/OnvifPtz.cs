@@ -27,7 +27,9 @@ namespace SDS.Video.Onvif
             Port = port;
             User = user;
             Password = password;
-            throw new NotImplementedException();
+
+            PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), port, User, Password);
+            MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, User, Password);
         }
 
         public void Pan(float speed, string profileToken = "0")
