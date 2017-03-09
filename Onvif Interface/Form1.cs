@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Windows.Forms;
-using System.Net;
-using System.ServiceModel;
-using System.ServiceModel.Channels;
 
 using Onvif_Interface.OnvifDeviceManagementServiceReference;
 using System.ServiceModel.Discovery;
@@ -10,6 +7,7 @@ using System.IO;
 using Onvif_Interface.OnvifPtzServiceReference;
 using System.ServiceModel.Description;
 using SDS.Video.Onvif;
+using System.Text;
 
 namespace Onvif_Interface
 {
@@ -40,6 +38,10 @@ namespace Onvif_Interface
             btnPreset3.Click += BtnPreset_Click;
             btnPreset4.Click += BtnPreset_Click;
             btnPreset5.Click += BtnPreset_Click;
+
+            //// If this is not set to false, the HTTP header includes "Expect: 100-Continue"
+            //// This causes Samsung Onvif cameras to respond with error "417 - Expectation Failed"
+            System.Net.ServicePointManager.Expect100Continue = false;
         }
 
         private void btnGetOnvifInfo_Click(object sender, EventArgs e)
