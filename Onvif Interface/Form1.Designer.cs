@@ -83,7 +83,7 @@
             this.btnGetOnvifInfo.Location = new System.Drawing.Point(77, 448);
             this.btnGetOnvifInfo.Name = "btnGetOnvifInfo";
             this.btnGetOnvifInfo.Size = new System.Drawing.Size(109, 30);
-            this.btnGetOnvifInfo.TabIndex = 2;
+            this.btnGetOnvifInfo.TabIndex = 0;
             this.btnGetOnvifInfo.Text = "Get Device Info";
             this.btnGetOnvifInfo.UseVisualStyleBackColor = true;
             this.btnGetOnvifInfo.Click += new System.EventHandler(this.btnGetOnvifInfo_Click);
@@ -94,7 +94,7 @@
             this.txtIP.Name = "txtIP";
             this.txtIP.Size = new System.Drawing.Size(110, 20);
             this.txtIP.TabIndex = 0;
-            this.txtIP.Text = "127.0.0.1";
+            this.txtIP.Text = "172.22.10.110";
             // 
             // lblDeviceTime
             // 
@@ -213,7 +213,7 @@
             this.numPort.TabIndex = 1;
             this.numPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numPort.Value = new decimal(new int[] {
-            8251,
+            80,
             0,
             0,
             0});
@@ -264,7 +264,7 @@
             this.btnPreset5.Location = new System.Drawing.Point(147, 153);
             this.btnPreset5.Name = "btnPreset5";
             this.btnPreset5.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset5.TabIndex = 19;
+            this.btnPreset5.TabIndex = 11;
             this.btnPreset5.Text = "5";
             this.btnPreset5.UseVisualStyleBackColor = true;
             // 
@@ -273,7 +273,7 @@
             this.btnPreset4.Location = new System.Drawing.Point(116, 153);
             this.btnPreset4.Name = "btnPreset4";
             this.btnPreset4.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset4.TabIndex = 18;
+            this.btnPreset4.TabIndex = 10;
             this.btnPreset4.Text = "4";
             this.btnPreset4.UseVisualStyleBackColor = true;
             // 
@@ -282,7 +282,7 @@
             this.btnPreset3.Location = new System.Drawing.Point(85, 153);
             this.btnPreset3.Name = "btnPreset3";
             this.btnPreset3.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset3.TabIndex = 17;
+            this.btnPreset3.TabIndex = 9;
             this.btnPreset3.Text = "3";
             this.btnPreset3.UseVisualStyleBackColor = true;
             // 
@@ -291,7 +291,7 @@
             this.btnPreset2.Location = new System.Drawing.Point(54, 153);
             this.btnPreset2.Name = "btnPreset2";
             this.btnPreset2.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset2.TabIndex = 16;
+            this.btnPreset2.TabIndex = 8;
             this.btnPreset2.Text = "2";
             this.btnPreset2.UseVisualStyleBackColor = true;
             // 
@@ -300,7 +300,7 @@
             this.btnPreset1.Location = new System.Drawing.Point(23, 153);
             this.btnPreset1.Name = "btnPreset1";
             this.btnPreset1.Size = new System.Drawing.Size(25, 25);
-            this.btnPreset1.TabIndex = 15;
+            this.btnPreset1.TabIndex = 7;
             this.btnPreset1.Text = "1";
             this.btnPreset1.UseVisualStyleBackColor = true;
             // 
@@ -314,7 +314,7 @@
             0});
             this.numPtzCmdSpeed.Name = "numPtzCmdSpeed";
             this.numPtzCmdSpeed.Size = new System.Drawing.Size(46, 20);
-            this.numPtzCmdSpeed.TabIndex = 14;
+            this.numPtzCmdSpeed.TabIndex = 6;
             this.numPtzCmdSpeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numPtzCmdSpeed.ThousandsSeparator = true;
             this.numPtzCmdSpeed.Value = new decimal(new int[] {
@@ -383,7 +383,7 @@
             this.btnZoomOut.Location = new System.Drawing.Point(195, 65);
             this.btnZoomOut.Name = "btnZoomOut";
             this.btnZoomOut.Size = new System.Drawing.Size(50, 25);
-            this.btnZoomOut.TabIndex = 7;
+            this.btnZoomOut.TabIndex = 5;
             this.btnZoomOut.Text = "Out";
             this.btnZoomOut.UseVisualStyleBackColor = true;
             // 
@@ -392,7 +392,7 @@
             this.btnZoomIn.Location = new System.Drawing.Point(195, 34);
             this.btnZoomIn.Name = "btnZoomIn";
             this.btnZoomIn.Size = new System.Drawing.Size(50, 25);
-            this.btnZoomIn.TabIndex = 6;
+            this.btnZoomIn.TabIndex = 4;
             this.btnZoomIn.Text = "In";
             this.btnZoomIn.UseVisualStyleBackColor = true;
             // 
@@ -436,7 +436,7 @@
             this.btnPanRight.Location = new System.Drawing.Point(113, 45);
             this.btnPanRight.Name = "btnPanRight";
             this.btnPanRight.Size = new System.Drawing.Size(50, 25);
-            this.btnPanRight.TabIndex = 3;
+            this.btnPanRight.TabIndex = 2;
             this.btnPanRight.Text = "Right";
             this.btnPanRight.UseVisualStyleBackColor = true;
             // 
@@ -445,7 +445,7 @@
             this.btnPanLeft.Location = new System.Drawing.Point(13, 45);
             this.btnPanLeft.Name = "btnPanLeft";
             this.btnPanLeft.Size = new System.Drawing.Size(50, 25);
-            this.btnPanLeft.TabIndex = 2;
+            this.btnPanLeft.TabIndex = 1;
             this.btnPanLeft.Text = "Left";
             this.btnPanLeft.UseVisualStyleBackColor = true;
             // 
@@ -454,7 +454,7 @@
             this.btnTiltDown.Location = new System.Drawing.Point(63, 68);
             this.btnTiltDown.Name = "btnTiltDown";
             this.btnTiltDown.Size = new System.Drawing.Size(50, 25);
-            this.btnTiltDown.TabIndex = 1;
+            this.btnTiltDown.TabIndex = 3;
             this.btnTiltDown.Text = "Down";
             this.btnTiltDown.UseVisualStyleBackColor = true;
             // 
@@ -472,7 +472,7 @@
             this.btnSetConnectInfo.Location = new System.Drawing.Point(12, 63);
             this.btnSetConnectInfo.Name = "btnSetConnectInfo";
             this.btnSetConnectInfo.Size = new System.Drawing.Size(109, 30);
-            this.btnSetConnectInfo.TabIndex = 10;
+            this.btnSetConnectInfo.TabIndex = 2;
             this.btnSetConnectInfo.Text = "Set Connection Info";
             this.btnSetConnectInfo.UseVisualStyleBackColor = true;
             this.btnSetConnectInfo.Click += new System.EventHandler(this.btnSetConnectInfo_Click);
@@ -482,16 +482,17 @@
             this.txtUser.Location = new System.Drawing.Point(12, 125);
             this.txtUser.Name = "txtUser";
             this.txtUser.Size = new System.Drawing.Size(110, 20);
-            this.txtUser.TabIndex = 11;
-            this.txtUser.Text = "onvif";
+            this.txtUser.TabIndex = 3;
+            this.txtUser.Text = "admin";
             // 
             // txtPassword
             // 
             this.txtPassword.Location = new System.Drawing.Point(12, 167);
             this.txtPassword.Name = "txtPassword";
+            this.txtPassword.PasswordChar = '*';
             this.txtPassword.Size = new System.Drawing.Size(110, 20);
-            this.txtPassword.TabIndex = 12;
-            this.txtPassword.Text = "Sierra123";
+            this.txtPassword.TabIndex = 4;
+            this.txtPassword.Text = "P@ssw0rd";
             // 
             // lblIP
             // 

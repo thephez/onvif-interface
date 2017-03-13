@@ -28,14 +28,15 @@ namespace SDS.Video.Onvif
             User = user;
             Password = password;
 
-            PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), port, User, Password);
+            PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), Port, User, Password);
             MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, User, Password);
         }
 
         public void Pan(float speed, string profileToken = "0")
         {
             Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(mediaProfiles[0].token); // profileToken);
+            profileToken = mediaProfiles[0].token;
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
 
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
@@ -48,7 +49,8 @@ namespace SDS.Video.Onvif
         public void Tilt(float speed, string profileToken = "0")
         {
             Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(mediaProfiles[0].token); // profileToken);
+            profileToken = mediaProfiles[0].token;
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
             PTZSpeed velocity = new PTZSpeed();
@@ -60,7 +62,8 @@ namespace SDS.Video.Onvif
         public void Zoom(float speed, string profileToken = "0")
         {
             Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(mediaProfiles[0].token); // profileToken);
+            profileToken = mediaProfiles[0].token;
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
             PTZSpeed velocity = new PTZSpeed();
@@ -76,6 +79,38 @@ namespace SDS.Video.Onvif
             PtzClient.Stop(profileToken, true, true);
         }
 
+        /// <summary>
+        /// Move PTZ to provided preset number (defaults to media profile 0)
+        /// </summary>
+        /// <param name="presetNumber">Preset to use</param>
+        public void ShowPreset(int presetNumber)
+        {
+            string presetToken = string.Empty;
+
+            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
+            string profileToken = mediaProfiles[0].token;
+
+            PTZPreset[] presets = PtzClient.GetPresets(profileToken);
+            if (presets.Length >= presetNumber)
+            {
+                presetToken = presets[presetNumber - 1].token;
+
+                PTZSpeed velocity = new PTZSpeed();
+                velocity.PanTilt = new Vector2D() { x = (float)-0.5, y = 0 }; ;
+
+                PtzClient.GotoPreset(profileToken, presetToken, velocity);
+            }
+            else
+            {
+                throw new Exception(string.Format("Invalid Preset requested - preset number {0}", presetNumber));
+            }
+        }
+
+        /// <summary>
+        /// *DON'T USE - not completed. Call up a preset by Profile/Preset token
+        /// </summary>
+        /// <param name="profileToken"></param>
+        /// <param name="presetToken"></param>
         public void ShowPreset(string profileToken, string presetToken)
         {
             Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
@@ -90,7 +125,7 @@ namespace SDS.Video.Onvif
             }
             else
             {
-                throw new Exception(string.Format("Invalid Preset requsted - preset token {0}", presetToken));
+                throw new Exception(string.Format("Invalid Preset requested - preset token {0}", presetToken));
             }
         }
 

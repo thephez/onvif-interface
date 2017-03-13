@@ -96,7 +96,8 @@ namespace Onvif_Interface
             if (lbxCapabilities.Items.Contains("http://www.onvif.org/ver20/ptz/wsdl"))
             {
                 gbxPtzControl.Visible = true;
-                PTZTest(client, ip, port);
+                GetPtzServices(ip, port);
+                //PTZTest(client, ip, port);
             }
         }
 
@@ -178,6 +179,31 @@ namespace Onvif_Interface
             }
 
             DeviceServiceCapabilities dsc = client.GetServiceCapabilities();
+        }
+
+        private void GetPtzServices(string ip, int port)
+        {
+            PTZClient ptzService;
+            OnvifMediaServiceReference.MediaClient mediaService;
+
+            // Create PTZ and Media object
+            if (txtUser.Text != string.Empty)
+            {
+                ptzService = OnvifServices.GetOnvifPTZClient(ip, port, txtUser.Text, txtPassword.Text);
+                mediaService = OnvifServices.GetOnvifMediaClient(ip, port, txtUser.Text, txtPassword.Text);
+            }
+            else
+            {
+                ptzService = OnvifServices.GetOnvifPTZClient(ip, port);
+                mediaService = OnvifServices.GetOnvifMediaClient(ip, port);
+            }
+
+            lbxPtzInfo.Items.Add("Supported Operations");
+            foreach (OperationDescription odc in ptzService.Endpoint.Contract.Operations)
+            {
+                lbxPtzInfo.Items.Add("  " + odc.Name);
+            }
+            Console.WriteLine(ptzService);
         }
 
         private void PTZTest(DeviceClient client, string ip, int port)
@@ -371,7 +397,7 @@ namespace Onvif_Interface
             OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             try
             {
-                ptz.ShowPreset("0", btn.Text);
+                ptz.ShowPreset(Convert.ToInt32(btn.Text));
                 Console.WriteLine(string.Format("Moving to preset {0}", btn.Text));
                 UpdatePtzLocation(ptz.GetPtzLocation());
             }

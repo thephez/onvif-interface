@@ -1,5 +1,6 @@
 ﻿using Microsoft.Web.Services3.Security.Tokens;
 using System;
+using System.Diagnostics;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
@@ -24,7 +25,7 @@ namespace Onvif_Interface.WsSecurity
 
         public void AfterReceiveReply(ref System.ServiceModel.Channels.Message reply, object correlationState)
         {
-            Console.WriteLine("PasswordDigestMessageInspector AfterReceiveReply");
+            Debug.Print(string.Format("PasswordDigestMessageInspector AfterReceiveReply: {0}", reply.ToString()));
             //throw new NotImplementedException();
         }
 
@@ -63,7 +64,7 @@ namespace Onvif_Interface.WsSecurity
 
         public void AddBindingParameters(ServiceEndpoint endpoint, System.ServiceModel.Channels.BindingParameterCollection bindingParameters)
         {
-            Console.WriteLine("PasswordDigestBehavior AddBindingParameters");
+            Debug.Print("PasswordDigestBehavior AddBindingParameters");
             //throw new NotImplementedException();
         }
 
@@ -79,7 +80,7 @@ namespace Onvif_Interface.WsSecurity
 
         public void Validate(ServiceEndpoint endpoint)
         {
-            Console.WriteLine("PasswordDigestBehavior Validate");
+            Debug.Print("PasswordDigestBehavior Validate");
             //throw new NotImplementedException();
         }
 
