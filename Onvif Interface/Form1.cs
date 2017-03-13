@@ -39,9 +39,17 @@ namespace Onvif_Interface
             btnPreset4.Click += BtnPreset_Click;
             btnPreset5.Click += BtnPreset_Click;
 
+            chkShowPwd.CheckedChanged += ChkShowPwd_CheckedChanged;
+
             //// If this is not set to false, the HTTP header includes "Expect: 100-Continue"
             //// This causes Samsung Onvif cameras to respond with error "417 - Expectation Failed"
             System.Net.ServicePointManager.Expect100Continue = false;
+        }
+
+        private void ChkShowPwd_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox chk = (CheckBox)sender;
+            txtPassword.PasswordChar = chk.Checked ? '\0' : '*';
         }
 
         private void btnGetOnvifInfo_Click(object sender, EventArgs e)
@@ -52,7 +60,7 @@ namespace Onvif_Interface
             tssLbl.Text = "Scanning device";
             btnGetOnvifInfo.Enabled = false;
             UseWaitCursor = true;
-            gbxPtzControl.Visible = false;
+            //gbxPtzControl.Visible = false;
 
             lbxCapabilities.Items.Clear();
             lbxPtzInfo.Items.Clear();
@@ -95,9 +103,14 @@ namespace Onvif_Interface
 
             if (lbxCapabilities.Items.Contains("http://www.onvif.org/ver20/ptz/wsdl"))
             {
-                gbxPtzControl.Visible = true;
+                //gbxPtzControl.Visible = true;
+                gbxPtzControl.Enabled = true;
                 GetPtzServices(ip, port);
                 //PTZTest(client, ip, port);
+            }
+            else
+            {
+                gbxPtzControl.Enabled = false;
             }
         }
 
@@ -161,18 +174,21 @@ namespace Onvif_Interface
             Service[] svc = client.GetServices(IncludeCapability: true);
             foreach (Service s in svc)
             {
-                Console.WriteLine(s.XAddr + " " + s.Capabilities.NamespaceURI + " " + s.Namespace);
+                Console.WriteLine(s.XAddr + " " + " " + s.Namespace);  // Not present on Axis + s.Capabilities.NamespaceURI);
                 lbxCapabilities.Items.Add(string.Format("{0}", s.Namespace));
-                foreach (System.Xml.XmlNode x in s.Capabilities)
+                if (s.Capabilities != null)
                 {
-                    Console.WriteLine(string.Format("\t{0}", x.LocalName));
-                    lbxCapabilities.Items.Add(string.Format("    {0}", x.LocalName));
-                    if (x.Attributes.Count > 0)
+                    foreach (System.Xml.XmlNode x in s.Capabilities)
                     {
-                        foreach (System.Xml.XmlNode a in x.Attributes)
+                        Console.WriteLine(string.Format("\t{0}", x.LocalName));
+                        lbxCapabilities.Items.Add(string.Format("    {0}", x.LocalName));
+                        if (x.Attributes.Count > 0)
                         {
-                            Console.WriteLine(string.Format("\t\t{0} = {1}", a.Name, a.Value));
-                            lbxCapabilities.Items.Add(string.Format("        {0} = {1}", a.Name, a.Value));
+                            foreach (System.Xml.XmlNode a in x.Attributes)
+                            {
+                                Console.WriteLine(string.Format("\t\t{0} = {1}", a.Name, a.Value));
+                                lbxCapabilities.Items.Add(string.Format("        {0} = {1}", a.Name, a.Value));
+                            }
                         }
                     }
                 }

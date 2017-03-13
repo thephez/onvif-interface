@@ -70,6 +70,7 @@
             this.lblPort = new System.Windows.Forms.Label();
             this.lblUser = new System.Windows.Forms.Label();
             this.lblPassword = new System.Windows.Forms.Label();
+            this.chkShowPwd = new System.Windows.Forms.CheckBox();
             this.statusStrip1.SuspendLayout();
             this.gbxDeviceInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -94,7 +95,7 @@
             this.txtIP.Name = "txtIP";
             this.txtIP.Size = new System.Drawing.Size(110, 20);
             this.txtIP.TabIndex = 0;
-            this.txtIP.Text = "172.22.10.110";
+            this.txtIP.Text = "172.16.5.11";
             // 
             // lblDeviceTime
             // 
@@ -483,7 +484,7 @@
             this.txtUser.Name = "txtUser";
             this.txtUser.Size = new System.Drawing.Size(110, 20);
             this.txtUser.TabIndex = 3;
-            this.txtUser.Text = "admin";
+            this.txtUser.Text = "onvif";
             // 
             // txtPassword
             // 
@@ -492,7 +493,7 @@
             this.txtPassword.PasswordChar = '*';
             this.txtPassword.Size = new System.Drawing.Size(110, 20);
             this.txtPassword.TabIndex = 4;
-            this.txtPassword.Text = "P@ssw0rd";
+            this.txtPassword.Text = "Sierra123";
             // 
             // lblIP
             // 
@@ -530,11 +531,22 @@
             this.lblPassword.TabIndex = 16;
             this.lblPassword.Text = "Password";
             // 
+            // chkShowPwd
+            // 
+            this.chkShowPwd.AutoSize = true;
+            this.chkShowPwd.Location = new System.Drawing.Point(128, 167);
+            this.chkShowPwd.Name = "chkShowPwd";
+            this.chkShowPwd.Size = new System.Drawing.Size(102, 17);
+            this.chkShowPwd.TabIndex = 17;
+            this.chkShowPwd.Text = "Show Password";
+            this.chkShowPwd.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(866, 556);
+            this.Controls.Add(this.chkShowPwd);
             this.Controls.Add(this.lblPassword);
             this.Controls.Add(this.lblUser);
             this.Controls.Add(this.lblPort);
@@ -607,6 +619,7 @@
         private System.Windows.Forms.Label lblPort;
         private System.Windows.Forms.Label lblUser;
         private System.Windows.Forms.Label lblPassword;
+        private System.Windows.Forms.CheckBox chkShowPwd;
     }
 }
 
