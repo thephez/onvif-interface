@@ -1,6 +1,5 @@
 ﻿using Onvif_Interface.OnvifPtzServiceReference;
 using System;
-using System.Runtime.Serialization;
 
 namespace SDS.Video.Onvif
 {

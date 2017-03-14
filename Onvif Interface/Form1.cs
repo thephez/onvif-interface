@@ -92,7 +92,7 @@ namespace Onvif_Interface
 
             GetDeviceInfo(client);
             GetServices(client);
-
+            
             if (lbxCapabilities.Items.Contains("http://www.onvif.org/ver20/ptz/wsdl"))
             {
                 gbxPtzControl.Enabled = true;
@@ -103,6 +103,8 @@ namespace Onvif_Interface
             {
                 gbxPtzControl.Enabled = false;
             }
+
+            GetMediaInfo();
         }
 
         private void GetDeviceTime(DeviceClient client)
@@ -181,6 +183,25 @@ namespace Onvif_Interface
             //DeviceServiceCapabilities dsc = client.GetServiceCapabilities();
         }
 
+        private void GetMediaInfo()
+        {
+            lbxCapabilities.Items.Add("");
+            lbxCapabilities.Items.Add("Media Info");
+            OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
+            OnvifMediaServiceReference.VideoSource[] videoSources = mclient.GetVideoSources();
+            foreach (OnvifMediaServiceReference.VideoSource v in videoSources)
+            {
+                string vsInfo = string.Format("  Video Source {0}: Framerate={1}, Resolution={2}x{3}", v.token, v.Framerate, v.Resolution.Width, v.Resolution.Height);
+                lbxCapabilities.Items.Add(string.Format("{0}", vsInfo));
+            }
+            OnvifMediaServiceReference.Profile[] mProfiles = mclient.GetProfiles();
+            foreach (OnvifMediaServiceReference.Profile p in mProfiles)
+            {
+                string pInfo = string.Format("  Profile {0}: Token={1}", p.Name, p.token);
+                lbxCapabilities.Items.Add(string.Format("{0}", pInfo));
+            }
+        }
+
         private void GetPtzServices(string ip, int port)
         {
             PTZClient ptzService;
@@ -238,16 +259,6 @@ namespace Onvif_Interface
                 throw;
             }
 
-            //// Get Nodes
-            //OnvifPtzServiceReference.PTZNode[] nodes = ptz.GetNodes();
-            //Console.WriteLine(nodes.Length);
-
-            //foreach (OnvifPtzServiceReference.PTZNode n in nodes)
-            //{
-            //    lbxCapabilities.Items.Add("PTZ " + n.Name);
-            //    File.AppendAllText("ptz.txt", string.Format("\nPTZ node - Name: {0}, Presets: {1}", n.Name, n.MaximumNumberOfPresets));
-            //}
-
             // Fails if not a PTZ
             OnvifPtzServiceReference.PTZNode node = ptzService.GetNode("1"); // nodes[0].token);
 
@@ -270,7 +281,6 @@ namespace Onvif_Interface
                     velocity.PanTilt = new Vector2D() { x = (float)-0.5, y = 0 }; ;
                     //ptzService.GotoPreset(profileToken, presets[presets.Length - 1].token, velocity);
 
-                    //PtzContinuousMove(ptzService, mediaService, profileToken, 100);
                     //ptz.GotoHomePosition(profileToken, velocity);
                     //ptzService.Stop(profileToken, true, false);
                 }
@@ -305,25 +315,6 @@ namespace Onvif_Interface
             lblPtzLocationZoom.Text = "zoom: " + status.Position.Zoom.x.ToString();
         }
 
-        private void PtzContinuousMove(PTZClient ptzService, OnvifMediaServiceReference.MediaClient mediaService, string profileToken, int stopTimeMs)
-        {
-            OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
-
-            PTZConfigurationOptions ptzConfigurationOptions = ptzService.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
-
-            PTZSpeed velocity = new PTZSpeed();
-            velocity.PanTilt = new Vector2D()
-            {
-                x = ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].XRange.Max,
-                y = 0, //(float)-0.25, //ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].YRange.Max,
-                //space = ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].URI
-            };
-
-            ptzService.ContinuousMove(profileToken, velocity, null);
-            System.Threading.Thread.Sleep(250);
-            ptzService.Stop(profileToken, false, false);
-        }
-
         private void PtzStop()
         {
             OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
@@ -339,45 +330,13 @@ namespace Onvif_Interface
             //string password = "Sierra123";
             //string nonce = "h3dfca1Z/E+Wm15KYE78mgUAAAAAAA==";
             //string date = "2017-03-08T17:11:48.000Z";
-
             //string digest = "kkj/3C2oLKU57bzYCMKLAKjbheo=";
-
             string password = "userpassword";
             string nonce = "LKqI6G/AikKCQrN0zqZFlg==";
             string date = "2010-09-16T07:50:45Z";
             string digest = "tuOSpGlFlIXsozq4HFNeeGeFLEI=";
 
-            //string password = "Sierra123";
-            //string nonce = "HfOAyyjcc5VuV7e8fZ8BQw==";
-            //string date = "2017-03-09T21:48:29Z";
-            //string digest = "65YPBTtQuQoYuLuDYSNlU0rr7Hs=";
-
             //GetWsPasswordDigest("admin", password, nonce, date, digest);
-
-            //OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
-            //OnvifMediaServiceReference.VideoSource[] videoSources = mclient.GetVideoSources();
-            //foreach (OnvifMediaServiceReference.VideoSource v in videoSources)
-            //{
-            //    string vsInfo = string.Format("VSrc {0}: Framerate={1}, Resolution={2}x{3}", v.token, v.Framerate, v.Resolution.Width, v.Resolution.Height);
-            //    lbxCapabilities.Items.Add(string.Format("{0}", vsInfo));
-            //}
-            //OnvifMediaServiceReference.Profile[] mProfiles = mclient.GetProfiles();
-            //foreach (OnvifMediaServiceReference.Profile p in mProfiles)
-            //{
-            //    string pInfo = string.Format("Profile {0}: Token={1}", p.Name, p.token);
-            //    lbxCapabilities.Items.Add(string.Format("{0}", pInfo));
-            //}
-            //Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = mclient.GetProfile(mProfiles[0].token); // profileToken);
-
-            //if (mediaProfile.PTZConfiguration != null)
-            //{
-            //    PTZClient PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
-            //    PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Media profile does not contain a PTZ configuration", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            //}
         }
 
         public void GetWsPasswordDigest(string user, string password, string nonce, string timestamp, string digest = "")
