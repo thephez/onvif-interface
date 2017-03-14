@@ -560,7 +560,7 @@
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.txtIP);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Onvif Test Client";
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.gbxDeviceInfo.ResumeLayout(false);

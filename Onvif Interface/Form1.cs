@@ -46,12 +46,6 @@ namespace Onvif_Interface
             System.Net.ServicePointManager.Expect100Continue = false;
         }
 
-        private void ChkShowPwd_CheckedChanged(object sender, EventArgs e)
-        {
-            CheckBox chk = (CheckBox)sender;
-            txtPassword.PasswordChar = chk.Checked ? '\0' : '*';
-        }
-
         private void btnGetOnvifInfo_Click(object sender, EventArgs e)
         {
             IP = txtIP.Text;
@@ -60,10 +54,8 @@ namespace Onvif_Interface
             tssLbl.Text = "Scanning device";
             btnGetOnvifInfo.Enabled = false;
             UseWaitCursor = true;
-            //gbxPtzControl.Visible = false;
 
-            lbxCapabilities.Items.Clear();
-            lbxPtzInfo.Items.Clear();
+            ClearData();
 
             try
             {
@@ -97,13 +89,12 @@ namespace Onvif_Interface
             // Switch to an authenticated client if the username field contains something
             if (txtUser.Text != string.Empty)
                 client = OnvifServices.GetOnvifDeviceClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
-            
+
             GetDeviceInfo(client);
             GetServices(client);
 
             if (lbxCapabilities.Items.Contains("http://www.onvif.org/ver20/ptz/wsdl"))
             {
-                //gbxPtzControl.Visible = true;
                 gbxPtzControl.Enabled = true;
                 GetPtzServices(ip, port);
                 //PTZTest(client, ip, port);
@@ -116,18 +107,11 @@ namespace Onvif_Interface
 
         private void GetDeviceTime(DeviceClient client)
         {
-            try
-            {
-                SystemDateTime dt = client.GetSystemDateAndTime();
-                string date = string.Format("{0:0000}-{1:00}-{2:00}", dt.UTCDateTime.Date.Year, dt.UTCDateTime.Date.Month, dt.UTCDateTime.Date.Day);
-                string time = string.Format("{0:00}:{1:00}:{2:00}", dt.UTCDateTime.Time.Hour, dt.UTCDateTime.Time.Minute, dt.UTCDateTime.Time.Second);
-                lblDeviceTime.Text = string.Format("Device Time: {0} {1}", date, time);
-                //File.AppendAllText("info.txt", string.Format("\n\nDate and Time from: {0}:{1} [UTC Date: {2}, UTC Time: {3}]", ip, port, date, time));
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            SystemDateTime dt = client.GetSystemDateAndTime();
+            string date = string.Format("{0:0000}-{1:00}-{2:00}", dt.UTCDateTime.Date.Year, dt.UTCDateTime.Date.Month, dt.UTCDateTime.Date.Day);
+            string time = string.Format("{0:00}:{1:00}:{2:00}", dt.UTCDateTime.Time.Hour, dt.UTCDateTime.Time.Minute, dt.UTCDateTime.Time.Second);
+            lblDeviceTime.Text = string.Format("Device Time: {0} {1}", date, time);
+            File.AppendAllText("info.txt", string.Format("\n\nDate and Time from: {0}:{1} [UTC Date: {2}, UTC Time: {3}]", IP.ToString(), Port, date, time));
         }
 
         private void GetDeviceInfo(DeviceClient client)
@@ -147,7 +131,7 @@ namespace Onvif_Interface
 
                 tssLbl.Text = string.Format("{0} - Device info retrieved", System.DateTime.Now);
                 Console.WriteLine(deviceInfo);
-                //File.AppendAllText("info.txt", string.Format("\nDevice: {0} ({4}:{5}) [Firmware: {1}, Serial #: {2}, Hardware ID: {3}]\n", model, fwversion, serialno, hwid, ip, port));
+                File.AppendAllText("info.txt", string.Format("\nDevice: {0} ({4}:{5}) [Firmware: {1}, Serial #: {2}, Hardware ID: {3}]\n", model, fwversion, serialno, hwid, IP.ToString(), Port));
             }
             catch (Exception ex) when (ex.InnerException.Message == "The remote server returned an error: (401) Unauthorized.")
             {
@@ -194,7 +178,7 @@ namespace Onvif_Interface
                 }
             }
 
-            DeviceServiceCapabilities dsc = client.GetServiceCapabilities();
+            //DeviceServiceCapabilities dsc = client.GetServiceCapabilities();
         }
 
         private void GetPtzServices(string ip, int port)
@@ -230,15 +214,9 @@ namespace Onvif_Interface
             // Create PTZ object
             PTZClient ptzService = OnvifServices.GetOnvifPTZClient(ip, port); // new PTZClient(client.Endpoint.Binding, client.Endpoint.Address);
 
-            lbxPtzInfo.Items.Add("Supported Operations");
-            foreach (OperationDescription odc in ptzService.Endpoint.Contract.Operations)
-            {
-                lbxPtzInfo.Items.Add("  " + odc.Name);
-            }
-            Console.WriteLine(ptzService);
-
             // Get target profile
-            string profileToken = "0";
+            OnvifMediaServiceReference.Profile[] mediaProfiles = mediaService.GetProfiles();
+            string profileToken = mediaProfiles[0].token;
             OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
 
             // Get Presets
@@ -259,7 +237,7 @@ namespace Onvif_Interface
                 tssLbl.Text = "Unable to get presets and update location: " + ex.Message;
                 throw;
             }
-            
+
             //// Get Nodes
             //OnvifPtzServiceReference.PTZNode[] nodes = ptz.GetNodes();
             //Console.WriteLine(nodes.Length);
@@ -332,7 +310,7 @@ namespace Onvif_Interface
             OnvifMediaServiceReference.Profile mediaProfile = mediaService.GetProfile(profileToken);
 
             PTZConfigurationOptions ptzConfigurationOptions = ptzService.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
-            
+
             PTZSpeed velocity = new PTZSpeed();
             velocity.PanTilt = new Vector2D()
             {
@@ -356,6 +334,91 @@ namespace Onvif_Interface
         {
             IP = txtIP.Text;
             Port = (int)numPort.Value;
+
+            // ODM Axis example
+            //string password = "Sierra123";
+            //string nonce = "h3dfca1Z/E+Wm15KYE78mgUAAAAAAA==";
+            //string date = "2017-03-08T17:11:48.000Z";
+
+            //string digest = "kkj/3C2oLKU57bzYCMKLAKjbheo=";
+
+            string password = "userpassword";
+            string nonce = "LKqI6G/AikKCQrN0zqZFlg==";
+            string date = "2010-09-16T07:50:45Z";
+            string digest = "tuOSpGlFlIXsozq4HFNeeGeFLEI=";
+
+            //string password = "Sierra123";
+            //string nonce = "HfOAyyjcc5VuV7e8fZ8BQw==";
+            //string date = "2017-03-09T21:48:29Z";
+            //string digest = "65YPBTtQuQoYuLuDYSNlU0rr7Hs=";
+
+            //GetWsPasswordDigest("admin", password, nonce, date, digest);
+
+            //OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
+            //OnvifMediaServiceReference.VideoSource[] videoSources = mclient.GetVideoSources();
+            //foreach (OnvifMediaServiceReference.VideoSource v in videoSources)
+            //{
+            //    string vsInfo = string.Format("VSrc {0}: Framerate={1}, Resolution={2}x{3}", v.token, v.Framerate, v.Resolution.Width, v.Resolution.Height);
+            //    lbxCapabilities.Items.Add(string.Format("{0}", vsInfo));
+            //}
+            //OnvifMediaServiceReference.Profile[] mProfiles = mclient.GetProfiles();
+            //foreach (OnvifMediaServiceReference.Profile p in mProfiles)
+            //{
+            //    string pInfo = string.Format("Profile {0}: Token={1}", p.Name, p.token);
+            //    lbxCapabilities.Items.Add(string.Format("{0}", pInfo));
+            //}
+            //Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = mclient.GetProfile(mProfiles[0].token); // profileToken);
+
+            //if (mediaProfile.PTZConfiguration != null)
+            //{
+            //    PTZClient PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
+            //    PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Media profile does not contain a PTZ configuration", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            //}
+        }
+
+        public void GetWsPasswordDigest(string user, string password, string nonce, string timestamp, string digest = "")
+        {
+            var nonceDecodeBinary = Convert.FromBase64String(nonce);
+            byte[] dateBinary = Encoding.UTF8.GetBytes(timestamp);
+            byte[] passwordBinary = Encoding.UTF8.GetBytes(password);
+            Console.WriteLine(string.Format("Nonce decoded from B64 -> Hex: {0} ", BitConverter.ToString(nonceDecodeBinary)));
+
+            byte[] concatData = new byte[nonceDecodeBinary.Length + dateBinary.Length + passwordBinary.Length];
+            Buffer.BlockCopy(nonceDecodeBinary, 0, concatData, 0, nonceDecodeBinary.Length);
+            Buffer.BlockCopy(dateBinary, 0, concatData, nonceDecodeBinary.Length, dateBinary.Length);
+            Buffer.BlockCopy(passwordBinary, 0, concatData, nonceDecodeBinary.Length + dateBinary.Length, passwordBinary.Length);
+
+            System.Security.Cryptography.SHA1 sha1 = System.Security.Cryptography.SHA1.Create();
+            string computedDigest = Convert.ToBase64String(sha1.ComputeHash(concatData));
+            Console.WriteLine(string.Format("Current Hash:\t{0}\nOriginal Hash:\t{1}", computedDigest, digest));
+
+            if (digest != "")
+            {
+                if (computedDigest == digest)
+                    MessageBox.Show("Hash match" + txtPassword.Text);
+                else
+                    MessageBox.Show(string.Format("Hash mismatch\nActual\t{0}\nCalc\t{1}", digest, computedDigest));
+            }
+        }
+
+        private void ClearData()
+        {
+            lbxCapabilities.Items.Clear();
+            lbxPtzInfo.Items.Clear();
+
+            lblFirmware.Text = "Firmware:";
+            lblModel.Text = "Model:";
+            lblSerial.Text = "Serial #:";
+            lblHwID.Text = "Hardware ID:";
+            lblDeviceTime.Text = "Time:";
+
+            lblPtzLocationX.Text = "Location (x):";
+            lblPtzLocationY.Text = "Location (y):";
+            lblPtzLocationZoom.Text = "Location (zoom):";
         }
 
         //PTZ Move commands
@@ -422,7 +485,7 @@ namespace Onvif_Interface
                 MessageBox.Show(ex.Message, "Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
-        
+
         // Ptz stop commands
         private void BtnTilt_MouseUp(object sender, MouseEventArgs e)
         {
@@ -437,6 +500,12 @@ namespace Onvif_Interface
         private void BtnZoom_MouseUp(object sender, MouseEventArgs e)
         {
             PtzStop();
+        }
+
+        private void ChkShowPwd_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox chk = (CheckBox)sender;
+            txtPassword.PasswordChar = chk.Checked ? '\0' : '*';
         }
     }
 }

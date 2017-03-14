@@ -32,51 +32,76 @@ namespace SDS.Video.Onvif
             MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, User, Password);
         }
 
-        public void Pan(float speed, string profileToken = "0")
+        /// <summary>
+        /// Gets the first media profile that contains a PTZConfiguration from the the MediaClient GetProfiles command
+        /// </summary>
+        /// <returns>Media profile with PTZConfiguration</returns>
+        private Onvif_Interface.OnvifMediaServiceReference.Profile GetMediaProfile()
         {
             Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-            profileToken = mediaProfiles[0].token;
-            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
 
+            foreach (Onvif_Interface.OnvifMediaServiceReference.Profile p in mediaProfiles)
+            {
+                if (p.PTZConfiguration != null)
+                    return MediaClient.GetProfile(p.token);
+            }
+
+            throw new Exception("No media profiles containing a PTZConfiguration on this device");
+        }
+
+        /// <summary>
+        /// Pan the camera (uses the first media profile that is PTZ capable)
+        /// </summary>
+        /// <param name="speed">Percent of max speed to move the camera (1-100)</param>
+        public void Pan(float speed)
+        {
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = GetMediaProfile();
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
             PTZSpeed velocity = new PTZSpeed();
             velocity.PanTilt = new Vector2D() { x = speed * ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].XRange.Max, y = 0 };
 
-            PtzClient.ContinuousMove(profileToken, velocity, null);
+            PtzClient.ContinuousMove(mediaProfile.token, velocity, null);
         }
 
-        public void Tilt(float speed, string profileToken = "0")
+        /// <summary>
+        /// Tilt the camera (uses the first media profile that is PTZ capable)
+        /// </summary>
+        /// <param name="speed">Percent of max speed to move the camera (1-100)</param>
+        public void Tilt(float speed)
         {
-            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-            profileToken = mediaProfiles[0].token;
-            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = GetMediaProfile();
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
             PTZSpeed velocity = new PTZSpeed();
             velocity.PanTilt = new Vector2D() { x = 0, y = speed * ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].YRange.Max };
 
-            PtzClient.ContinuousMove(profileToken, velocity, null);
+            PtzClient.ContinuousMove(mediaProfile.token, velocity, null);
         }
 
-        public void Zoom(float speed, string profileToken = "0")
+        /// <summary>
+        /// Zoom the camera (uses the first media profile that is PTZ capable)
+        /// </summary>
+        /// <param name="speed">Percent of max speed to move the camera (1-100)</param>
+        public void Zoom(float speed)
         {
-            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-            profileToken = mediaProfiles[0].token;
-            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = MediaClient.GetProfile(profileToken);
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = GetMediaProfile();
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
 
             PTZSpeed velocity = new PTZSpeed();
             velocity.Zoom = new Vector1D() { x = speed * ptzConfigurationOptions.Spaces.ContinuousZoomVelocitySpace[0].XRange.Max };
 
-            PtzClient.ContinuousMove(profileToken, velocity, null);
+            PtzClient.ContinuousMove(mediaProfile.token, velocity, null);
         }
 
-        public void Stop(string profileToken = "0")
+        /// <summary>
+        /// Stop the camera (uses the first media profile that is PTZ capable).
+        /// NOTE: may not work if not issued in conjunction with a move command
+        /// </summary>
+        public void Stop()
         {
-            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-            profileToken = mediaProfiles[0].token;
-            PtzClient.Stop(profileToken, true, true);
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = GetMediaProfile();
+            PtzClient.Stop(mediaProfile.token, true, true);
         }
 
         /// <summary>
@@ -87,8 +112,9 @@ namespace SDS.Video.Onvif
         {
             string presetToken = string.Empty;
 
-            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-            string profileToken = mediaProfiles[0].token;
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = GetMediaProfile();
+            //Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
+            string profileToken = mediaProfile.token;
 
             PTZPreset[] presets = PtzClient.GetPresets(profileToken);
             if (presets.Length >= presetNumber)
@@ -141,12 +167,11 @@ namespace SDS.Video.Onvif
             return false;
         }
 
-        public PTZStatus GetPtzLocation(string profileToken = "0")
+        public PTZStatus GetPtzLocation()
         {
-            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-            profileToken = mediaProfiles[0].token;
+            Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = GetMediaProfile();
 
-            PTZStatus status = PtzClient.GetStatus(profileToken);
+            PTZStatus status = PtzClient.GetStatus(mediaProfile.token);
             return status;
         }
     }
