@@ -3,8 +3,6 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Net;
 using Onvif_Interface.OnvifPtzServiceReference;
-using Microsoft.Web.Services3.Security.Tokens;
-using System.Xml;
 using Onvif_Interface.WsSecurity;
 
 namespace SDS.Video.Onvif

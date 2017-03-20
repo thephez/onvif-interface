@@ -109,6 +109,7 @@ namespace Onvif_Interface
 
         private void GetDeviceTime(DeviceClient client)
         {
+            // Should compare recieved timestamp with local machine.  If out of sync, authentication may fail
             SystemDateTime dt = client.GetSystemDateAndTime();
             string date = string.Format("{0:0000}-{1:00}-{2:00}", dt.UTCDateTime.Date.Year, dt.UTCDateTime.Date.Month, dt.UTCDateTime.Date.Day);
             string time = string.Format("{0:00}:{1:00}:{2:00}", dt.UTCDateTime.Time.Hour, dt.UTCDateTime.Time.Minute, dt.UTCDateTime.Time.Second);

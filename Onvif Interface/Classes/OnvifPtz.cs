@@ -1,5 +1,6 @@
 ﻿using Onvif_Interface.OnvifPtzServiceReference;
 using System;
+using System.IO;
 
 namespace SDS.Video.Onvif
 {
@@ -11,6 +12,7 @@ namespace SDS.Video.Onvif
         private string Password;
         private PTZClient PtzClient;
         private Onvif_Interface.OnvifMediaServiceReference.MediaClient MediaClient;
+        public bool PtzAvailable;
 
         public OnvifPtz(string ip, int port)
         {
@@ -56,7 +58,7 @@ namespace SDS.Video.Onvif
         {
             Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = GetMediaProfile();
             PTZConfigurationOptions ptzConfigurationOptions = PtzClient.GetConfigurationOptions(mediaProfile.PTZConfiguration.token);
-
+            File.AppendAllText("info.txt", string.Format("Media Profile [Name: {0}, Token: {1}, PTZ Config. Name: {2}, PTZ Config. Token: {3}]\n", mediaProfile.Name, mediaProfile.token, mediaProfile.PTZConfiguration.Name, mediaProfile.PTZConfiguration.token));
             PTZSpeed velocity = new PTZSpeed();
             velocity.PanTilt = new Vector2D() { x = speed * ptzConfigurationOptions.Spaces.ContinuousPanTiltVelocitySpace[0].XRange.Max, y = 0 };
 
@@ -173,5 +175,21 @@ namespace SDS.Video.Onvif
             PTZStatus status = PtzClient.GetStatus(mediaProfile.token);
             return status;
         }
+
+        public bool IsPtz()
+        {
+            try
+            {
+                Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = GetMediaProfile();
+                PtzAvailable = true;
+            }
+            catch (Exception ex)
+            {
+                PtzAvailable = false;
+            }
+
+            return PtzAvailable;
+        }
+
     }
 }
