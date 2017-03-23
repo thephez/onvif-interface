@@ -92,8 +92,8 @@ namespace OnvifEvents
             listBox1.Items.Add(string.Format("  WSSubscriptionPolicySupportSpecified: {0}", c.WSSubscriptionPolicySupportSpecified));
 
             //pull(ip, port);
-            //subscribe(ip, port);
-            test(ip, port);
+            subscribe(ip, port);
+            //test(ip, port);
 
             //PullPointClient ppc = OnvifServices.GetPullPointClient(ip, port);
                         
@@ -124,14 +124,14 @@ namespace OnvifEvents
 
             string localIP = GetLocalIp(); // "172.16.5.111";
 
-            // Consumer client (for receiving notifications?) - not working
-            NotificationConsumerClient ncc = OnvifServices.GetNotificationConsumerClient(localIP, 8085, "subscription-1");
-            Console.WriteLine(string.Format("Consumer Client state: {0}", ncc.State));
-            ncc.Open();
-            Console.WriteLine(string.Format("Consumer Client state: {0}", ncc.State));
-            Notify n = new Notify();
-            n.PropertyChanged += N_PropertyChanged;
-            ncc.Notify(n);
+            //// Consumer client (for receiving notifications?) - not working
+            //NotificationConsumerClient ncc = OnvifServices.GetNotificationConsumerClient(localIP, 8080, "subscription-1");
+            //Console.WriteLine(string.Format("Consumer Client state: {0}", ncc.State));
+            //ncc.Open();
+            //Console.WriteLine(string.Format("Consumer Client state: {0}", ncc.State));
+            //Notify n = new Notify();
+            //n.PropertyChanged += N_PropertyChanged;
+            //ncc.Notify(n);
 
 
             // Producer client
@@ -140,7 +140,7 @@ namespace OnvifEvents
 
             Subscribe s = new Subscribe();
             // Consumer reference tells the device where to Post messages back to (the client)
-            EndpointReferenceType clientEndpoint = new EndpointReferenceType() { Address = new AttributedURIType() { Value = string.Format("http://{0}:8085/subscription-1", localIP) } };
+            EndpointReferenceType clientEndpoint = new EndpointReferenceType() { Address = new AttributedURIType() { Value = string.Format("http://{0}:8080/subscription-1", localIP) } };
             s.ConsumerReference = clientEndpoint;// ert;
             s.InitialTerminationTime = "PT60S";
 
@@ -222,7 +222,7 @@ namespace OnvifEvents
             
             //HttpRequestMessageProperty requestMessage = new HttpRequestMessageProperty();
             //requestMessage.Headers.Add("test", "value");
-            lstHeaders.Add(MessageHeader.CreateHeader("test", "something", "value"));
+            //lstHeaders.Add(MessageHeader.CreateHeader("test", "something", "value"));
 
             // oAux1.Address.Value -> the proxy endpoint address
             // lstHeaders -> headers to add to the SOAP message of the proxy request
@@ -245,7 +245,7 @@ namespace OnvifEvents
                     {
                         Console.WriteLine(string.Format("{0} = {1}", x.Name, x.Value));
                     }
-                    //listBox1.Items.Add(message.Message.OuterXml.ToString());
+                    
                     string time = message.Message.Attributes[0].Value;
                     string topic = message.Topic.Any[0].Value;
                     string operation = message.Message.Attributes[1].Value;
