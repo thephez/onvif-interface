@@ -18,6 +18,7 @@ namespace OnvifEvents
         Timer SubRenewTimer = new Timer();
         string SubRenewUri;
         SubscriptionManagerClient SubscriptionManagerClient;
+        OnvifHttpListener httpListener = new OnvifHttpListener();
 
         public Form1()
         {
@@ -26,9 +27,22 @@ namespace OnvifEvents
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            System.Net.ServicePointManager.Expect100Continue = false;
-            OnvifHttpListener.HttpServer(8080);
-            
+            ServicePointManager.Expect100Continue = false;
+            httpListener.HttpServer(8080);
+            httpListener.Notification += HttpListener_Notification;
+        }
+
+        private void HttpListener_Notification(object sender, EventArgs e)
+        {
+            listBox1.Items.Add("Notification(s) received");
+            NotificationEventArgs n = (NotificationEventArgs)e;
+
+            foreach (string notification in n.Notifications)
+            {
+                listBox1.Items.Add(string.Format("  {0}", notification));
+            }
+
+            listBox1.SelectedIndex = listBox1.Items.Count - 1;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -38,7 +52,7 @@ namespace OnvifEvents
             int port = 80;
 
             EventPortTypeClient eptc = OnvifServices.GetEventClient(ip, port);
-            
+
             // 1. Get Event Properties
             bool fixedTopicSet;
             TopicSetType tst = new TopicSetType();
@@ -111,7 +125,7 @@ namespace OnvifEvents
             //Notify n = new Notify();
             //n.PropertyChanged += N_PropertyChanged;
             //ncc.Notify(n);
-            
+
             // Producer client
             NotificationProducerClient npc = OnvifServices.GetNotificationProducerClient(ip, port);
             npc.Endpoint.Address = eptc.Endpoint.Address;
@@ -134,7 +148,6 @@ namespace OnvifEvents
             SubRenewTimer.Tick += SubRenewTimer_Tick;
 
             SubscriptionManagerClient = OnvifServices.GetSubscriptionManagerClient(SubRenewUri); // oAux1.Address.Value);
-            //Renew();
         }
 
         /// <summary>
@@ -159,6 +172,7 @@ namespace OnvifEvents
             RenewResponse oRenewResult = SubscriptionManagerClient.Renew(new Renew() { TerminationTime = "PT60S" });
             SubTermTime = oRenewResult.TerminationTime;
             Console.WriteLine(string.Format("Current Time: {0}\tTermination Time: {1}", oRenewResult.CurrentTime.ToString(), oRenewResult.TerminationTime.Value.ToString()));
+            listBox1.Items.Add(string.Format("Subscription renewed - Current Time: {0}\tTermination Time: {1}", oRenewResult.CurrentTime.ToString(), oRenewResult.TerminationTime.Value.ToString()));
         }
 
         public void pull(string ip, int port)
@@ -173,11 +187,11 @@ namespace OnvifEvents
             List<MessageHeader> lstHeaders = new List<MessageHeader>() { };
 
             EndpointReferenceType ert = eptc.CreatePullPointSubscription(
-                filter, 
-                "PT15S", 
-                new CreatePullPointSubscriptionSubscriptionPolicy(), 
-                ref xml, 
-                out currentTime, 
+                filter,
+                "PT15S",
+                new CreatePullPointSubscriptionSubscriptionPolicy(),
+                ref xml,
+                out currentTime,
                 out termTime
                 );
             listBox1.Items.Add(ert.Address.Value);
@@ -232,7 +246,7 @@ namespace OnvifEvents
                     lstHeaders.Add(MessageHeader.CreateHeader(strName, strNS, strValue, true));
                 }
             }
-            
+
             //HttpRequestMessageProperty requestMessage = new HttpRequestMessageProperty();
             //requestMessage.Headers.Add("test", "value");
             //lstHeaders.Add(MessageHeader.CreateHeader("test", "something", "value"));
@@ -245,7 +259,7 @@ namespace OnvifEvents
 
             //do
             //{
-                NotificationMessageHolderType[] NotificationMessages;
+            NotificationMessageHolderType[] NotificationMessages;
             try
             {
                 oPullPointSubscriptionClient.PullMessages("PT60S", 1024, Any, out CurrentTime, out NotificationMessages);
@@ -258,7 +272,7 @@ namespace OnvifEvents
                     {
                         Console.WriteLine(string.Format("{0} = {1}", x.Name, x.Value));
                     }
-                    
+
                     string time = message.Message.Attributes[0].Value;
                     string topic = message.Topic.Any[0].Value;
                     string operation = message.Message.Attributes[1].Value;

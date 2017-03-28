@@ -1,23 +1,27 @@
-﻿using System;
+﻿using Microsoft.Web.Services3.Messaging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace OnvifEvents
 {
-    class OnvifHttpListener
+    public class OnvifHttpListener
     {
+        public event EventHandler Notification;
 
-        //public OnvifHttpListener()
-        //{
+        public void OnNotification(List<string> notifyMessages)
+        {
+            NotificationEventArgs e = new NotificationEventArgs(notifyMessages);
+            Notification?.Invoke(this, e);
+        }
 
-        //}
-
-        public static async void HttpServer(int port)
+        public async void HttpServer(int port)
         {
             HttpListener http = GetHttpListener(port);
             Console.WriteLine(string.Format("\nStarting Http Listener on port {0}\n", port));
@@ -39,7 +43,7 @@ namespace OnvifEvents
             }
         }
 
-        private static async void ProcessRequest(HttpListenerContext httpRequest)
+        private async void ProcessRequest(HttpListenerContext httpRequest)
         {
             Console.WriteLine(string.Format("{0} Processing request", DateTime.Now.ToString("hh.mm.ss.ffffff")));
             HttpListenerRequest request = httpRequest.Request;
@@ -72,30 +76,36 @@ namespace OnvifEvents
                         //    .First()
                         //    .FirstNode;
 
-                        var unwrappedResponse = xDoc.Descendants((XNamespace)"http://docs.oasis-open.org/wsn/b-2" + "Message")
-                            .First()
-                            .FirstNode;
-                        Console.WriteLine(unwrappedResponse + "\n");
+                        //var notificationMsg = xDoc.Descendants((XNamespace)"http://docs.oasis-open.org/wsn/b-2" + "Notify")
+                        //    .First()
+                        //    .FirstNode;
+                        //Console.WriteLine(notificationMsg + "\n");
 
-                        var items = xDoc.Descendants(onvifEvent + "Message").Elements();
-                        foreach (var item in items)
-                        {
-                            Console.WriteLine(item.FirstAttribute.Name + " " + item.FirstAttribute.Value);
-                            Console.WriteLine(item.LastAttribute.Name + " " + item.LastAttribute.Value);
-                        }
+                        var notifications = xDoc.Descendants(onvifEvent + "Notify").Elements();
+                        ParseNotifications(notifications);
 
-                        onvifEvent = XNamespace.Get("http://www.onvif.org/ver10/schema");
-                        items = xDoc.Descendants(onvifEvent + "Source").Elements();
-                        foreach (var item in items)
-                        {
-                            Console.WriteLine(item.FirstAttribute.Value + " = " + item.LastAttribute.Value);
-                        }
+                        XmlDocument x = new XmlDocument();
+                        x.LoadXml(xml);
 
-                        items = xDoc.Descendants(onvifEvent + "Data").Elements();
-                        foreach (var item in items)
-                        {
-                            Console.WriteLine(item.FirstAttribute.Value + " = " + item.LastAttribute.Value);
-                        }
+                        //foreach (var item in notifications)
+                        //{
+                        //    Console.WriteLine(item.FirstAttribute.Name + " " + item.FirstAttribute.Value);
+                        //    Console.WriteLine(item.LastAttribute.Name + " " + item.LastAttribute.Value);
+                        //}
+
+                        //var items = xDoc.Descendants(onvifEvent + "Message").Elements();
+                        //foreach (var item in items)
+                        //{
+                        //    Console.WriteLine(item.FirstAttribute.Name + " " + item.FirstAttribute.Value);
+                        //    Console.WriteLine(item.LastAttribute.Name + " " + item.LastAttribute.Value);
+                        //}
+
+                        //onvifEvent = XNamespace.Get("http://www.onvif.org/ver10/schema");
+                        //items = xDoc.Descendants(onvifEvent + "Source").Elements();
+                        //foreach (var item in items)
+                        //{
+                        //    Console.WriteLine(item.FirstAttribute.Value + " = " + item.LastAttribute.Value);
+                        //}
                     }
                 }
             }
@@ -105,7 +115,7 @@ namespace OnvifEvents
             // Send response
             HttpListenerResponse response = httpRequest.Response;
             response.StatusCode = 202;  // 202 - Accepted
-            System.IO.Stream output = response.OutputStream;
+            Stream output = response.OutputStream;
             const string responseString = ""; //<html><body>Hello world</body></html>";
             var buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
             response.ContentLength64 = buffer.Length;
@@ -114,6 +124,48 @@ namespace OnvifEvents
             output.Close();
 
             Console.WriteLine(string.Format("{0} Done processing", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+        }
+
+        private void ParseNotifications(IEnumerable<XElement> notifications)
+        {
+            XNamespace onvifEvent = XNamespace.Get("http://docs.oasis-open.org/wsn/b-2");
+            XNamespace onvifEventDetail = XNamespace.Get("http://www.onvif.org/ver10/schema");
+            //XNamespace onvifEventTopic = XNamespace.Get("http://www.onvif.org/ver10/topics");
+            List<string> notifyMessages = new List<string>();
+
+            foreach (var n in notifications)
+            {
+                string notifyXml = n.ToString();
+                XDocument xDoc = XDocument.Load(new StringReader(notifyXml));
+
+                // Topic
+                IEnumerable<XAttribute> topic = xDoc.Descendants(onvifEvent + "Topic").Attributes();
+                XNode a = n.Parent.FirstNode.NextNode;
+
+                // Message
+                var message = xDoc.Descendants(onvifEvent + "Message").Elements();
+                IEnumerable<XAttribute> msgAttr = message.Attributes();
+                var time = msgAttr.ElementAt(0).Value;
+                //var time = message.Attributes("UtcTime").ToString();
+                var operation = msgAttr.ElementAt(1).Value;// message.Attributes("PropertyOperation");
+
+                // Source
+                var source = xDoc.Descendants(onvifEventDetail + "Source").Elements();
+                IEnumerable<XAttribute> srcAttr = source.Attributes();
+                var srcName = srcAttr.ElementAt(0).Value;
+                var srcValue = srcAttr.ElementAt(1).Value;
+
+                // Data
+                var data = xDoc.Descendants(onvifEventDetail + "Data").Elements();
+                IEnumerable<XAttribute> dataAttr = data.Attributes();
+                var dataName = dataAttr.ElementAt(0).Value;
+                var dataValue = dataAttr.ElementAt(1).Value;
+
+                Console.WriteLine(string.Format("Event Info - Time: {0}, Operation: {1}, {2} = {3}, {4} = {5}", time, operation, srcName, srcValue, dataName, dataValue));
+                notifyMessages.Add(string.Format("Event Info - Time: {0}, Operation: {1}, {2} = {3}, {4} = {5}", time, operation, srcName, srcValue, dataName, dataValue));
+            }
+
+            OnNotification(notifyMessages);
         }
 
         private static string GetXml(StreamReader reader)
@@ -128,6 +180,16 @@ namespace OnvifEvents
             http.Prefixes.Add(string.Format("http://*:{0}/subscription-1/", port));
 
             return http;
+        }
+    }
+
+    public class NotificationEventArgs : EventArgs
+    {
+        public List<string> Notifications;
+
+        public NotificationEventArgs(List<string> notifications)
+        {
+            Notifications = notifications;
         }
     }
 }
