@@ -48,8 +48,8 @@ namespace OnvifEvents
         private void button1_Click(object sender, EventArgs e)
         {
             listBox1.Items.Clear();
-            string ip = "172.16.5.12";
-            int port = 80;
+            string ip = txtIP.Text; // "172.16.5.12";
+            int port = Convert.ToInt16(numPort.Value); // 80;
 
             EventPortTypeClient eptc = OnvifServices.GetEventClient(ip, port);
 
