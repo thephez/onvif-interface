@@ -1,0 +1,133 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+
+namespace OnvifEvents
+{
+    class OnvifHttpListener
+    {
+
+        //public OnvifHttpListener()
+        //{
+
+        //}
+
+        public static async void HttpServer(int port)
+        {
+            HttpListener http = GetHttpListener(port);
+            Console.WriteLine(string.Format("\nStarting Http Listener on port {0}\n", port));
+            http.Start();
+
+            while (true)
+            {
+                // Check if still listening
+                if (!http.IsListening)
+                {
+                    Console.WriteLine("\nHttp Listener no longer listening.  Restarting...\n");
+                    http.Start();
+                    System.Threading.Thread.Sleep(500);
+                }
+
+                HttpListenerContext httpRequest = await http.GetContextAsync();
+                Console.WriteLine(string.Format("{0} Received request", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+                ProcessRequest(httpRequest);
+            }
+        }
+
+        private static async void ProcessRequest(HttpListenerContext httpRequest)
+        {
+            Console.WriteLine(string.Format("{0} Processing request", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+            HttpListenerRequest request = httpRequest.Request;
+
+            Console.WriteLine(DateTime.Now.ToString("hh.mm.ss.ffffff") + " " + httpRequest.Request.InputStream.ToString());
+
+            if (httpRequest.Request.InputStream.CanRead)
+            {
+                using (Stream body = request.InputStream)
+                {
+                    //XmlDocument doc = new XmlDocument();
+                    //doc.Load(body);
+
+                    using (StreamReader reader = new StreamReader(body, request.ContentEncoding))
+                    {
+                        Console.WriteLine(string.Format("{0} Reading XML", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+
+                        // Use task to get xml to avoid locking up
+                        Task<string> task = Task.Run(() => GetXml(reader));
+                        string xml = await task;
+                        //Console.WriteLine(xml);
+                        Console.WriteLine(string.Format("{0} XML read complete", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+
+                        XDocument xDoc = XDocument.Load(new StringReader(xml));
+                        Console.WriteLine(string.Format("{0} xDoc loaded", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+
+                        XNamespace onvifEvent = XNamespace.Get("http://docs.oasis-open.org/wsn/b-2");
+
+                        //var unwrappedResponse = xDoc.Descendants((XNamespace)"http://www.w3.org/2003/05/soap-envelope" + "Body")
+                        //    .First()
+                        //    .FirstNode;
+
+                        var unwrappedResponse = xDoc.Descendants((XNamespace)"http://docs.oasis-open.org/wsn/b-2" + "Message")
+                            .First()
+                            .FirstNode;
+                        Console.WriteLine(unwrappedResponse + "\n");
+
+                        var items = xDoc.Descendants(onvifEvent + "Message").Elements();
+                        foreach (var item in items)
+                        {
+                            Console.WriteLine(item.FirstAttribute.Name + " " + item.FirstAttribute.Value);
+                            Console.WriteLine(item.LastAttribute.Name + " " + item.LastAttribute.Value);
+                        }
+
+                        onvifEvent = XNamespace.Get("http://www.onvif.org/ver10/schema");
+                        items = xDoc.Descendants(onvifEvent + "Source").Elements();
+                        foreach (var item in items)
+                        {
+                            Console.WriteLine(item.FirstAttribute.Value + " = " + item.LastAttribute.Value);
+                        }
+
+                        items = xDoc.Descendants(onvifEvent + "Data").Elements();
+                        foreach (var item in items)
+                        {
+                            Console.WriteLine(item.FirstAttribute.Value + " = " + item.LastAttribute.Value);
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine(string.Format("{0} Sending response", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+
+            // Send response
+            HttpListenerResponse response = httpRequest.Response;
+            response.StatusCode = 202;  // 202 - Accepted
+            System.IO.Stream output = response.OutputStream;
+            const string responseString = ""; //<html><body>Hello world</body></html>";
+            var buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+            response.ContentLength64 = buffer.Length;
+            output.Write(buffer, 0, buffer.Length);
+            //Console.WriteLine(output);
+            output.Close();
+
+            Console.WriteLine(string.Format("{0} Done processing", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+        }
+
+        private static string GetXml(StreamReader reader)
+        {
+            string xml = reader.ReadToEnd();  // Slow operation
+            return xml;
+        }
+
+        public static HttpListener GetHttpListener(int port)
+        {
+            HttpListener http = new HttpListener();
+            http.Prefixes.Add(string.Format("http://*:{0}/subscription-1/", port));
+
+            return http;
+        }
+    }
+}

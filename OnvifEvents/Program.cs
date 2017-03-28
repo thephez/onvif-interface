@@ -20,7 +20,6 @@ namespace OnvifEvents
         [STAThread]
         static void Main()
         {
-            HttpServer();
             //WebServer ws = new WebServer(SendResponse, GetOnvifHttpPrefix(8080)); // "http://localhost:8080/test/");
             //ws.Run();
 
@@ -33,100 +32,6 @@ namespace OnvifEvents
         //{
         //    return string.Format("<HTML><BODY>My web page.<br>{0}</BODY></HTML>", DateTime.Now);
         //}
-
-        public static async void HttpServer()
-        {
-            HttpListener http = GetHttpListener(8080);
-            http.Start();
-
-            while (true)
-            {
-                // Check if still listening
-                if (!http.IsListening)
-                {
-                    Console.WriteLine("Http Listener no longer listening.  Restarting...");
-                    http.Start();
-                    System.Threading.Thread.Sleep(500);
-                }
-
-
-                HttpListenerContext httpRequest = await http.GetContextAsync();
-                HttpListenerRequest request = httpRequest.Request;
-
-                Console.WriteLine(httpRequest.Request.InputStream.ToString());
-                
-                if (httpRequest.Request.InputStream.CanRead)
-                {
-                    //byte[] input = new byte[] { };
-                    //httpRequest.Request.InputStream.Read(input, 0, Convert.ToInt32(httpRequest.Request.InputStream.Length));
-
-                    using (System.IO.Stream body = request.InputStream)
-                    {
-
-                        //XmlDocument doc = new XmlDocument();
-                        //doc.Load(body);
-                        
-                        using (System.IO.StreamReader reader = new StreamReader(body, request.ContentEncoding))
-                        {
-                            string xml = reader.ReadToEnd();
-                            //Console.WriteLine(xml);
-                            
-                            XDocument xDoc = XDocument.Load(new StringReader(xml));
-                            XNamespace onvifEvent = XNamespace.Get("http://docs.oasis-open.org/wsn/b-2");
-
-                            //var unwrappedResponse = xDoc.Descendants((XNamespace)"http://www.w3.org/2003/05/soap-envelope" + "Body")
-                            //    .First()
-                            //    .FirstNode;
-
-                            var unwrappedResponse = xDoc.Descendants((XNamespace)"http://docs.oasis-open.org/wsn/b-2" + "Message")
-                                .First()
-                                .FirstNode;
-                            Console.WriteLine(unwrappedResponse + "\n");
-
-                            var items = xDoc.Descendants(onvifEvent + "Message").Elements();
-                            foreach (var item in items)
-                            {
-                                Console.WriteLine(item.FirstAttribute.Name + " " + item.FirstAttribute.Value);
-                                Console.WriteLine(item.LastAttribute.Name + " " + item.LastAttribute.Value);
-                            }
-
-
-                            onvifEvent = XNamespace.Get("http://www.onvif.org/ver10/schema");
-                            items = xDoc.Descendants(onvifEvent + "Source").Elements();
-                            foreach (var item in items)
-                            {
-                                Console.WriteLine(item.FirstAttribute.Value + " = " + item.LastAttribute.Value);
-                            }
-
-                            items = xDoc.Descendants(onvifEvent + "Data").Elements();
-                            foreach (var item in items)
-                            {
-                                Console.WriteLine(item.FirstAttribute.Value + " = " + item.LastAttribute.Value);
-                            }
-                        }
-                    }
-                }
-
-                // Send response
-                HttpListenerResponse response = httpRequest.Response;
-                response.StatusCode = 202;
-                System.IO.Stream output = response.OutputStream;
-                const string responseString = ""; //<html><body>Hello world</body></html>";
-                var buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
-                response.ContentLength64 = buffer.Length;
-                output.Write(buffer, 0, buffer.Length);
-                //Console.WriteLine(output);
-                output.Close();
-            }
-        }
-
-        public static HttpListener GetHttpListener(int port)
-        {
-            HttpListener http = new HttpListener();
-            http.Prefixes.Add(string.Format("http://*:{0}/subscription-1/", port));
-
-            return http;
-        }
 
         public static string GetOnvifHttpPrefix(int port)
         {

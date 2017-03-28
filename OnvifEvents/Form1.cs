@@ -27,6 +27,7 @@ namespace OnvifEvents
         private void Form1_Load(object sender, EventArgs e)
         {
             System.Net.ServicePointManager.Expect100Continue = false;
+            OnvifHttpListener.HttpServer(8080);
             
         }
 

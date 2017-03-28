@@ -54,6 +54,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="OnvifEventBehavior.cs" />
+    <Compile Include="OnvifHttpListener.cs" />
     <Compile Include="OnvifServices.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
