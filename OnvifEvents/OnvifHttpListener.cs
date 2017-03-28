@@ -21,7 +21,7 @@ namespace OnvifEvents
             Notification?.Invoke(this, e);
         }
 
-        public async void HttpServer(int port)
+        public async void StartHttpServer(int port)
         {
             HttpListener http = GetHttpListener(port);
             Console.WriteLine(string.Format("\nStarting Http Listener on port {0}\n", port));
@@ -71,6 +71,9 @@ namespace OnvifEvents
                         Console.WriteLine(string.Format("{0} xDoc loaded", DateTime.Now.ToString("hh.mm.ss.ffffff")));
 
                         XNamespace onvifEvent = XNamespace.Get("http://docs.oasis-open.org/wsn/b-2");
+
+                        ScanElements(xDoc.Elements());
+                        
 
                         //var unwrappedResponse = xDoc.Descendants((XNamespace)"http://www.w3.org/2003/05/soap-envelope" + "Body")
                         //    .First()
@@ -126,6 +129,10 @@ namespace OnvifEvents
             Console.WriteLine(string.Format("{0} Done processing", DateTime.Now.ToString("hh.mm.ss.ffffff")));
         }
 
+        /// <summary>
+        /// Parse out notifications and pass a list of them to an event
+        /// </summary>
+        /// <param name="notifications"></param>
         private void ParseNotifications(IEnumerable<XElement> notifications)
         {
             XNamespace onvifEvent = XNamespace.Get("http://docs.oasis-open.org/wsn/b-2");
@@ -139,8 +146,8 @@ namespace OnvifEvents
                 XDocument xDoc = XDocument.Load(new StringReader(notifyXml));
 
                 // Topic
-                IEnumerable<XAttribute> topic = xDoc.Descendants(onvifEvent + "Topic").Attributes();
-                XNode a = n.Parent.FirstNode.NextNode;
+                List<XElement> topicList = xDoc.Descendants(onvifEvent + "Topic").ToList();
+                string topic = topicList.ElementAt(0).Value;
 
                 // Message
                 var message = xDoc.Descendants(onvifEvent + "Message").Elements();
@@ -161,8 +168,8 @@ namespace OnvifEvents
                 var dataName = dataAttr.ElementAt(0).Value;
                 var dataValue = dataAttr.ElementAt(1).Value;
 
-                Console.WriteLine(string.Format("Event Info - Time: {0}, Operation: {1}, {2} = {3}, {4} = {5}", time, operation, srcName, srcValue, dataName, dataValue));
-                notifyMessages.Add(string.Format("Event Info - Time: {0}, Operation: {1}, {2} = {3}, {4} = {5}", time, operation, srcName, srcValue, dataName, dataValue));
+                //Console.WriteLine(string.Format("Event Info - Time: {0}, Operation: {1}, {2} = {3}, {4} = {5}", time, operation, srcName, srcValue, dataName, dataValue));
+                notifyMessages.Add(string.Format("Event Info - Time: {1}, Topic: {0}, Operation: {2}, {3} = {4}, {5} = {6}", topic, time, operation, srcName, srcValue, dataName, dataValue));
             }
 
             OnNotification(notifyMessages);
@@ -180,6 +187,20 @@ namespace OnvifEvents
             http.Prefixes.Add(string.Format("http://*:{0}/subscription-1/", port));
 
             return http;
+        }
+
+        private void ScanElements(IEnumerable<XElement> elements)
+        {
+
+            foreach (XElement x in elements.Elements())
+            {
+                Console.WriteLine(x.Name.LocalName + " " + x.Value);
+                
+                if (x.HasElements)
+                {
+                    ScanElements(x.Elements());
+                }
+            }
         }
     }
 

@@ -18,7 +18,7 @@ namespace OnvifEvents
         Timer SubRenewTimer = new Timer();
         string SubRenewUri;
         SubscriptionManagerClient SubscriptionManagerClient;
-        OnvifHttpListener httpListener = new OnvifHttpListener();
+        OnvifHttpListener HttpListener = new OnvifHttpListener();
 
         public Form1()
         {
@@ -28,8 +28,8 @@ namespace OnvifEvents
         private void Form1_Load(object sender, EventArgs e)
         {
             ServicePointManager.Expect100Continue = false;
-            httpListener.HttpServer(8080);
-            httpListener.Notification += HttpListener_Notification;
+            HttpListener.StartHttpServer(8080);
+            HttpListener.Notification += HttpListener_Notification;
         }
 
         private void HttpListener_Notification(object sender, EventArgs e)
