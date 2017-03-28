@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,6 +14,11 @@ namespace OnvifEvents
 {
     public partial class Form1 : Form
     {
+        DateTime? SubTermTime;
+        Timer SubRenewTimer = new Timer();
+        string SubRenewUri;
+        SubscriptionManagerClient SubscriptionManagerClient;
+
         public Form1()
         {
             InitializeComponent();
@@ -34,7 +35,6 @@ namespace OnvifEvents
             listBox1.Items.Clear();
             string ip = "172.16.5.12";
             int port = 80;
-            //SubscriptionManagerClient smc = new SubscriptionManagerClient(bind, serviceAddress);
 
             EventPortTypeClient eptc = OnvifServices.GetEventClient(ip, port);
             
@@ -94,28 +94,6 @@ namespace OnvifEvents
             //pull(ip, port);
             subscribe(ip, port);
             //test(ip, port);
-
-            //PullPointClient ppc = OnvifServices.GetPullPointClient(ip, port);
-                        
-
-            //CreatePullPointSubscriptionRequest ppsr = new CreatePullPointSubscriptionRequest();
-            //ppsr.InitialTerminationTime = "PT60S";
-
-            //CreatePullPointClient ppc = new CreatePullPointClient(bind, serviceAddress);
-            //CreatePullPoint pp = new CreatePullPoint();
-            //ppc.CreatePullPoint(pp);
-        }
-
-        private void N_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            Console.WriteLine("Notify property changed");
-            throw new NotImplementedException();
-        }
-
-        private void Ppsp_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            listBox1.Items.Add(string.Format("--Property changed: {0}", e.PropertyName));
-            
         }
 
         public void subscribe(string ip, int port)
@@ -132,8 +110,7 @@ namespace OnvifEvents
             //Notify n = new Notify();
             //n.PropertyChanged += N_PropertyChanged;
             //ncc.Notify(n);
-
-
+            
             // Producer client
             NotificationProducerClient npc = OnvifServices.GetNotificationProducerClient(ip, port);
             npc.Endpoint.Address = eptc.Endpoint.Address;
@@ -141,11 +118,46 @@ namespace OnvifEvents
             Subscribe s = new Subscribe();
             // Consumer reference tells the device where to Post messages back to (the client)
             EndpointReferenceType clientEndpoint = new EndpointReferenceType() { Address = new AttributedURIType() { Value = string.Format("http://{0}:8080/subscription-1", localIP) } };
-            s.ConsumerReference = clientEndpoint;// ert;
+            s.ConsumerReference = clientEndpoint;
             s.InitialTerminationTime = "PT60S";
 
             SubscribeResponse sr = npc.Subscribe(s);
 
+            // Store the subscription URI for use in Renew
+            SubRenewUri = sr.SubscriptionReference.Address.Value;
+
+            // Start timer to periodically check if a Renew request needs to be issued
+            SubTermTime = sr.TerminationTime;
+            SubRenewTimer.Start();
+            SubRenewTimer.Interval = 1000;
+            SubRenewTimer.Tick += SubRenewTimer_Tick;
+
+            SubscriptionManagerClient = OnvifServices.GetSubscriptionManagerClient(SubRenewUri); // oAux1.Address.Value);
+            //Renew();
+        }
+
+        /// <summary>
+        /// Issues a subscription renew message ~10 seconds before the subscription's scheduled termination time
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SubRenewTimer_Tick(object sender, EventArgs e)
+        {
+            var timeDiff = SubTermTime - DateTime.UtcNow;
+            var x = timeDiff.Value.Ticks / TimeSpan.TicksPerSecond;
+            if (x < 10)
+            {
+                // Send renew
+                Renew();
+            }
+        }
+
+        public void Renew()
+        {
+            Console.WriteLine(DateTime.Now + "\tIssue subscription renew");
+            RenewResponse oRenewResult = SubscriptionManagerClient.Renew(new Renew() { TerminationTime = "PT60S" });
+            SubTermTime = oRenewResult.TerminationTime;
+            Console.WriteLine(string.Format("Current Time: {0}\tTermination Time: {1}", oRenewResult.CurrentTime.ToString(), oRenewResult.TerminationTime.Value.ToString()));
         }
 
         public void pull(string ip, int port)
@@ -269,7 +281,6 @@ namespace OnvifEvents
 
             //oSubscriptionManagerClient.Unsubscribe(new Unsubscribe());
         }
-
 
         public string GetLocalIp()
         {

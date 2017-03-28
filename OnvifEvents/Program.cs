@@ -1,4 +1,6 @@
-﻿using System;
+﻿using OnvifEvents.OnvifEventServiceReference;
+using SimpleWebServer;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,10 +21,18 @@ namespace OnvifEvents
         static void Main()
         {
             HttpServer();
+            //WebServer ws = new WebServer(SendResponse, GetOnvifHttpPrefix(8080)); // "http://localhost:8080/test/");
+            //ws.Run();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
         }
+
+        //public static string SendResponse(HttpListenerRequest request)
+        //{
+        //    return string.Format("<HTML><BODY>My web page.<br>{0}</BODY></HTML>", DateTime.Now);
+        //}
 
         public static async void HttpServer()
         {
@@ -31,13 +41,20 @@ namespace OnvifEvents
 
             while (true)
             {
+                // Check if still listening
+                if (!http.IsListening)
+                {
+                    Console.WriteLine("Http Listener no longer listening.  Restarting...");
+                    http.Start();
+                    System.Threading.Thread.Sleep(500);
+                }
+
+
                 HttpListenerContext httpRequest = await http.GetContextAsync();
                 HttpListenerRequest request = httpRequest.Request;
 
                 Console.WriteLine(httpRequest.Request.InputStream.ToString());
-
-
-
+                
                 if (httpRequest.Request.InputStream.CanRead)
                 {
                     //byte[] input = new byte[] { };
@@ -48,8 +65,7 @@ namespace OnvifEvents
 
                         //XmlDocument doc = new XmlDocument();
                         //doc.Load(body);
-
-
+                        
                         using (System.IO.StreamReader reader = new StreamReader(body, request.ContentEncoding))
                         {
                             string xml = reader.ReadToEnd();
@@ -87,15 +103,15 @@ namespace OnvifEvents
                             {
                                 Console.WriteLine(item.FirstAttribute.Value + " = " + item.LastAttribute.Value);
                             }
-
                         }
                     }
                 }
 
                 // Send response
                 HttpListenerResponse response = httpRequest.Response;
+                response.StatusCode = 202;
                 System.IO.Stream output = response.OutputStream;
-                const string responseString = "Ack"; //<html><body>Hello world</body></html>";
+                const string responseString = ""; //<html><body>Hello world</body></html>";
                 var buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
                 response.ContentLength64 = buffer.Length;
                 output.Write(buffer, 0, buffer.Length);
@@ -110,6 +126,11 @@ namespace OnvifEvents
             http.Prefixes.Add(string.Format("http://*:{0}/subscription-1/", port));
 
             return http;
+        }
+
+        public static string GetOnvifHttpPrefix(int port)
+        {
+            return string.Format("http://*:{0}/subscription-1/", port);
         }
     }
 }

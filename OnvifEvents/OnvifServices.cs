@@ -21,6 +21,11 @@ namespace OnvifEvents
             CustomBinding bind = new CustomBinding(messageElement, httpBinding);
 
             EventPortTypeClient eptc = new EventPortTypeClient(bind, serviceAddress);
+
+            //// Handles parsing SOAP messages received
+            //OnvifEventBehavior behavior = new OnvifEventBehavior();
+            //eptc.Endpoint.Behaviors.Add(behavior);
+
             return eptc;
         }
 
