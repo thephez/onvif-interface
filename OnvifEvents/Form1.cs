@@ -55,6 +55,7 @@ namespace OnvifEvents
 
         private void button1_Click(object sender, EventArgs e)
         {
+            Unsubscribe();
             listBox1.Items.Clear();
             string ip = txtIP.Text;
             int port = Convert.ToInt16(numPort.Value);

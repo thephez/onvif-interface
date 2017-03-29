@@ -25,6 +25,10 @@ namespace OnvifEvents
             Notification?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// Start a persistent HttpListener on the provided port
+        /// </summary>
+        /// <param name="port">TCP Port to listen to</param>
         public async void StartHttpServer(int port)
         {
             http = GetHttpListener(port);
@@ -50,7 +54,6 @@ namespace OnvifEvents
                     HttpListenerContext httpRequest = await http.GetContextAsync();
                     Console.WriteLine(string.Format("{0} Received request", DateTime.Now.ToString("hh.mm.ss.ffffff")));
                     ProcessRequest(httpRequest);
-
                 }
                 catch (Exception e)
                 {
@@ -59,6 +62,9 @@ namespace OnvifEvents
             }
         }
 
+        /// <summary>
+        /// Shut down the HttpListener
+        /// </summary>
         public void StopHttpServer()
         {
             Console.WriteLine("\nStopping Http Listener\n");
@@ -71,15 +77,10 @@ namespace OnvifEvents
             Console.WriteLine(string.Format("{0} Processing request", DateTime.Now.ToString("hh.mm.ss.ffffff")));
             HttpListenerRequest request = httpRequest.Request;
 
-            Console.WriteLine(DateTime.Now.ToString("hh.mm.ss.ffffff") + " " + httpRequest.Request.InputStream.ToString());
-
             if (httpRequest.Request.InputStream.CanRead)
             {
                 using (Stream body = request.InputStream)
                 {
-                    //XmlDocument doc = new XmlDocument();
-                    //doc.Load(body);
-
                     using (StreamReader reader = new StreamReader(body, request.ContentEncoding))
                     {
                         Console.WriteLine(string.Format("{0} Reading XML", DateTime.Now.ToString("hh.mm.ss.ffffff")));
@@ -99,12 +100,7 @@ namespace OnvifEvents
 
                                 XNamespace onvifEvent = XNamespace.Get("http://docs.oasis-open.org/wsn/b-2");
 
-                                ScanElements(xDoc.Elements());
-
-
-                                //var unwrappedResponse = xDoc.Descendants((XNamespace)"http://www.w3.org/2003/05/soap-envelope" + "Body")
-                                //    .First()
-                                //    .FirstNode;
+                                //ScanElements(xDoc.Elements());
 
                                 //var notificationMsg = xDoc.Descendants((XNamespace)"http://docs.oasis-open.org/wsn/b-2" + "Notify")
                                 //    .First()
@@ -113,13 +109,9 @@ namespace OnvifEvents
 
                                 var notifications = xDoc.Descendants(onvifEvent + "Notify").Elements();
                                 ParseNotifications(notifications);
-
-                                XmlDocument x = new XmlDocument();
-                                x.LoadXml(xml);
                             }
                             else
                             {
-                                // Null / empty string - don't process
                                 Debug.Print("Null or empty Xml string received - don't process");
                                 return;
                             }
@@ -129,25 +121,6 @@ namespace OnvifEvents
                             Debug.Print(e.Message);
                             return;
                         }
-                        //foreach (var item in notifications)
-                        //{
-                        //    Console.WriteLine(item.FirstAttribute.Name + " " + item.FirstAttribute.Value);
-                        //    Console.WriteLine(item.LastAttribute.Name + " " + item.LastAttribute.Value);
-                        //}
-
-                        //var items = xDoc.Descendants(onvifEvent + "Message").Elements();
-                        //foreach (var item in items)
-                        //{
-                        //    Console.WriteLine(item.FirstAttribute.Name + " " + item.FirstAttribute.Value);
-                        //    Console.WriteLine(item.LastAttribute.Name + " " + item.LastAttribute.Value);
-                        //}
-
-                        //onvifEvent = XNamespace.Get("http://www.onvif.org/ver10/schema");
-                        //items = xDoc.Descendants(onvifEvent + "Source").Elements();
-                        //foreach (var item in items)
-                        //{
-                        //    Console.WriteLine(item.FirstAttribute.Value + " = " + item.LastAttribute.Value);
-                        //}
                     }
                 }
             }
@@ -158,11 +131,10 @@ namespace OnvifEvents
             HttpListenerResponse response = httpRequest.Response;
             response.StatusCode = 202;  // 202 - Accepted
             Stream output = response.OutputStream;
-            const string responseString = ""; //<html><body>Hello world</body></html>";
-            var buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+            const string responseString = "";
+            var buffer = Encoding.UTF8.GetBytes(responseString);
             response.ContentLength64 = buffer.Length;
             output.Write(buffer, 0, buffer.Length);
-            //Console.WriteLine(output);
             output.Close();
 
             Console.WriteLine(string.Format("{0} Done processing", DateTime.Now.ToString("hh.mm.ss.ffffff")));
@@ -238,7 +210,6 @@ namespace OnvifEvents
 
         private void ScanElements(IEnumerable<XElement> elements)
         {
-
             foreach (XElement x in elements.Elements())
             {
                 Console.WriteLine(x.Name.LocalName + " " + x.Value);
@@ -251,6 +222,9 @@ namespace OnvifEvents
         }
     }
 
+    /// <summary>
+    /// EventArgs based class for returning Onvif notifications from HttpListener
+    /// </summary>
     public class NotificationEventArgs : EventArgs
     {
         public List<string> Notifications;
