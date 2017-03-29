@@ -28,6 +28,14 @@ namespace OnvifEvents
         private void Form1_Load(object sender, EventArgs e)
         {
             ServicePointManager.Expect100Continue = false;
+            StartServer();
+        }
+
+        private void StartServer()
+        {
+            if (HttpListener.IsListening)
+                HttpListener.StopHttpServer();
+
             HttpListener.StartHttpServer(8080);
             HttpListener.Notification += HttpListener_Notification;
         }
@@ -48,8 +56,8 @@ namespace OnvifEvents
         private void button1_Click(object sender, EventArgs e)
         {
             listBox1.Items.Clear();
-            string ip = txtIP.Text; // "172.16.5.12";
-            int port = Convert.ToInt16(numPort.Value); // 80;
+            string ip = txtIP.Text;
+            int port = Convert.ToInt16(numPort.Value);
 
             EventPortTypeClient eptc = OnvifServices.GetEventClient(ip, port);
 
@@ -117,15 +125,6 @@ namespace OnvifEvents
 
             string localIP = GetLocalIp(); // "172.16.5.111";
 
-            //// Consumer client (for receiving notifications?) - not working
-            //NotificationConsumerClient ncc = OnvifServices.GetNotificationConsumerClient(localIP, 8080, "subscription-1");
-            //Console.WriteLine(string.Format("Consumer Client state: {0}", ncc.State));
-            //ncc.Open();
-            //Console.WriteLine(string.Format("Consumer Client state: {0}", ncc.State));
-            //Notify n = new Notify();
-            //n.PropertyChanged += N_PropertyChanged;
-            //ncc.Notify(n);
-
             // Producer client
             NotificationProducerClient npc = OnvifServices.GetNotificationProducerClient(ip, port);
             npc.Endpoint.Address = eptc.Endpoint.Address;
@@ -142,10 +141,14 @@ namespace OnvifEvents
             SubRenewUri = sr.SubscriptionReference.Address.Value;
 
             // Start timer to periodically check if a Renew request needs to be issued
-            SubTermTime = sr.TerminationTime;
+            // Use PC time for timer in case camera time doesn't match PC time
+            // This works fine because the renew command issues a relative time (i.e. PT60S) so PC/Camera mismatch doesn't matter
+            SubTermTime = DateTime.UtcNow.AddSeconds(50); // sr.TerminationTime;
             SubRenewTimer.Start();
             SubRenewTimer.Interval = 1000;
             SubRenewTimer.Tick += SubRenewTimer_Tick;
+
+            listBox1.Items.Add(string.Format("Initial Termination Time: {0} (Current Time: {1})", SubTermTime, DateTime.UtcNow));
 
             SubscriptionManagerClient = OnvifServices.GetSubscriptionManagerClient(SubRenewUri); // oAux1.Address.Value);
         }
@@ -173,6 +176,7 @@ namespace OnvifEvents
             SubTermTime = oRenewResult.TerminationTime;
             Console.WriteLine(string.Format("Current Time: {0}\tTermination Time: {1}", oRenewResult.CurrentTime.ToString(), oRenewResult.TerminationTime.Value.ToString()));
             listBox1.Items.Add(string.Format("Subscription renewed - Current Time: {0}\tTermination Time: {1}", oRenewResult.CurrentTime.ToString(), oRenewResult.TerminationTime.Value.ToString()));
+            listBox1.SelectedIndex = listBox1.Items.Count - 1;
         }
 
         public void pull(string ip, int port)

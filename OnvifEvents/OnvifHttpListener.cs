@@ -12,6 +12,10 @@ namespace OnvifEvents
 {
     public class OnvifHttpListener
     {
+        private HttpListener http;
+        private bool RunServer = false;
+        public bool IsListening { get; private set; } =  false;
+
         public event EventHandler Notification;
 
         public void OnNotification(List<string> notifyMessages)
@@ -22,24 +26,43 @@ namespace OnvifEvents
 
         public async void StartHttpServer(int port)
         {
-            HttpListener http = GetHttpListener(port);
+            http = GetHttpListener(port);
             Console.WriteLine(string.Format("\nStarting Http Listener on port {0}\n", port));
             http.Start();
+            IsListening = http.IsListening;
 
-            while (true)
+            RunServer = true;
+            while (RunServer)
             {
                 // Check if still listening
                 if (!http.IsListening)
                 {
+                    IsListening = http.IsListening;
                     Console.WriteLine("\nHttp Listener no longer listening.  Restarting...\n");
                     http.Start();
                     System.Threading.Thread.Sleep(500);
+                    IsListening = http.IsListening;
                 }
 
-                HttpListenerContext httpRequest = await http.GetContextAsync();
-                Console.WriteLine(string.Format("{0} Received request", DateTime.Now.ToString("hh.mm.ss.ffffff")));
-                ProcessRequest(httpRequest);
+                try
+                {
+                    HttpListenerContext httpRequest = await http.GetContextAsync();
+                    Console.WriteLine(string.Format("{0} Received request", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+                    ProcessRequest(httpRequest);
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(string.Format("{0} Exception: {1}", DateTime.Now.ToString("hh.mm.ss.ffffff"), e.Message));
+                }
             }
+        }
+
+        public void StopHttpServer()
+        {
+            Console.WriteLine("\nStopping Http Listener\n");
+            RunServer = false;
+            http.Close();
         }
 
         private async void ProcessRequest(HttpListenerContext httpRequest)
