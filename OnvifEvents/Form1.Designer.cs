@@ -34,6 +34,7 @@
             this.lblIP = new System.Windows.Forms.Label();
             this.numPort = new System.Windows.Forms.NumericUpDown();
             this.txtIP = new System.Windows.Forms.TextBox();
+            this.btnUnsub = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
             this.SuspendLayout();
             // 
@@ -108,11 +109,22 @@
             this.txtIP.TabIndex = 15;
             this.txtIP.Text = "172.16.5.12";
             // 
+            // btnUnsub
+            // 
+            this.btnUnsub.Location = new System.Drawing.Point(724, 13);
+            this.btnUnsub.Name = "btnUnsub";
+            this.btnUnsub.Size = new System.Drawing.Size(83, 48);
+            this.btnUnsub.TabIndex = 19;
+            this.btnUnsub.Text = "Unsubscribe";
+            this.btnUnsub.UseVisualStyleBackColor = true;
+            this.btnUnsub.Click += new System.EventHandler(this.btnUnsub_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(819, 690);
+            this.Controls.Add(this.btnUnsub);
             this.Controls.Add(this.lblPort);
             this.Controls.Add(this.lblIP);
             this.Controls.Add(this.numPort);
@@ -121,6 +133,7 @@
             this.Controls.Add(this.button1);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_Closing);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).EndInit();
             this.ResumeLayout(false);
@@ -136,6 +149,7 @@
         private System.Windows.Forms.Label lblIP;
         private System.Windows.Forms.NumericUpDown numPort;
         private System.Windows.Forms.TextBox txtIP;
+        private System.Windows.Forms.Button btnUnsub;
     }
 }
 

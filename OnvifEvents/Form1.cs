@@ -97,6 +97,7 @@ namespace OnvifEvents
             foreach (XmlElement x in tst.Any)
                 listBox1.Items.Add("  " + x.Name);
 
+            // 2. Get capabilities
             Capabilities c = eptc.GetServiceCapabilities();
 
             listBox1.Items.Add("");
@@ -114,12 +115,14 @@ namespace OnvifEvents
             listBox1.Items.Add(string.Format("  WSSubscriptionPolicySupport: {0}", c.WSSubscriptionPolicySupport));
             listBox1.Items.Add(string.Format("  WSSubscriptionPolicySupportSpecified: {0}", c.WSSubscriptionPolicySupportSpecified));
 
+            //3. Subscribe to notifications
+            Subscribe(ip, port);
+
             //pull(ip, port);
-            subscribe(ip, port);
             //test(ip, port);
         }
 
-        public void subscribe(string ip, int port)
+        public void Subscribe(string ip, int port)
         {
             EventPortTypeClient eptc = OnvifServices.GetEventClient(ip, port);
 
@@ -169,6 +172,9 @@ namespace OnvifEvents
             }
         }
 
+        /// <summary>
+        /// Renews the SubscriptionManagerClient's subscription
+        /// </summary>
         public void Renew()
         {
             Console.WriteLine(DateTime.Now + "\tIssue subscription renew");
@@ -177,6 +183,28 @@ namespace OnvifEvents
             Console.WriteLine(string.Format("Current Time: {0}\tTermination Time: {1}", oRenewResult.CurrentTime.ToString(), oRenewResult.TerminationTime.Value.ToString()));
             listBox1.Items.Add(string.Format("Subscription renewed - Current Time: {0}\tTermination Time: {1}", oRenewResult.CurrentTime.ToString(), oRenewResult.TerminationTime.Value.ToString()));
             listBox1.SelectedIndex = listBox1.Items.Count - 1;
+        }
+
+        /// <summary>
+        /// Unsubscribes from the subscription in the SubscriptionManagerClient
+        /// </summary>
+        public void Unsubscribe()
+        {
+            if ((SubscriptionManagerClient != null) && ((SubscriptionManagerClient.State == CommunicationState.Opened) | (SubscriptionManagerClient.State == CommunicationState.Created)))
+            {
+                Unsubscribe u = new Unsubscribe();
+                UnsubscribeResponse oUnSubResult = SubscriptionManagerClient.Unsubscribe(u);
+                SubscriptionManagerClient.Close();
+                SubRenewTimer.Stop();
+
+                listBox1.Items.Add(string.Format("Subscription canceled - Current Time: {0}", DateTime.UtcNow));
+                listBox1.SelectedIndex = listBox1.Items.Count - 1;
+            }
+            else
+            {
+                listBox1.Items.Add(string.Format("No subscription to cancel - Current Time: {0}", DateTime.UtcNow));
+                listBox1.SelectedIndex = listBox1.Items.Count - 1;
+            }
         }
 
         public void pull(string ip, int port)
@@ -317,6 +345,16 @@ namespace OnvifEvents
             }
 
             throw new Exception("Local IP address not found");
+        }
+
+        private void btnUnsub_Click(object sender, EventArgs e)
+        {
+            Unsubscribe();
+        }
+
+        private void Form1_Closing(object sender, FormClosingEventArgs e)
+        {
+            Unsubscribe();
         }
     }
 }

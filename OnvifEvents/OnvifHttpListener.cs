@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -84,34 +85,50 @@ namespace OnvifEvents
                         Console.WriteLine(string.Format("{0} Reading XML", DateTime.Now.ToString("hh.mm.ss.ffffff")));
 
                         // Use task to get xml to avoid locking up
-                        Task<string> task = Task.Run(() => GetXml(reader));
-                        string xml = await task;
-                        //Console.WriteLine(xml);
-                        Console.WriteLine(string.Format("{0} XML read complete", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+                        try
+                        {
+                            Task<string> task = Task.Run(() => GetXml(reader));
+                            string xml = await task;
+                            //Console.WriteLine(xml);
+                            Console.WriteLine(string.Format("{0} XML read complete", DateTime.Now.ToString("hh.mm.ss.ffffff")));
 
-                        XDocument xDoc = XDocument.Load(new StringReader(xml));
-                        Console.WriteLine(string.Format("{0} xDoc loaded", DateTime.Now.ToString("hh.mm.ss.ffffff")));
+                            if (xml != null && xml != string.Empty)
+                            {
+                                XDocument xDoc = XDocument.Load(new StringReader(xml));
+                                Console.WriteLine(string.Format("{0} xDoc loaded", DateTime.Now.ToString("hh.mm.ss.ffffff")));
 
-                        XNamespace onvifEvent = XNamespace.Get("http://docs.oasis-open.org/wsn/b-2");
+                                XNamespace onvifEvent = XNamespace.Get("http://docs.oasis-open.org/wsn/b-2");
 
-                        ScanElements(xDoc.Elements());
-                        
+                                ScanElements(xDoc.Elements());
 
-                        //var unwrappedResponse = xDoc.Descendants((XNamespace)"http://www.w3.org/2003/05/soap-envelope" + "Body")
-                        //    .First()
-                        //    .FirstNode;
 
-                        //var notificationMsg = xDoc.Descendants((XNamespace)"http://docs.oasis-open.org/wsn/b-2" + "Notify")
-                        //    .First()
-                        //    .FirstNode;
-                        //Console.WriteLine(notificationMsg + "\n");
+                                //var unwrappedResponse = xDoc.Descendants((XNamespace)"http://www.w3.org/2003/05/soap-envelope" + "Body")
+                                //    .First()
+                                //    .FirstNode;
 
-                        var notifications = xDoc.Descendants(onvifEvent + "Notify").Elements();
-                        ParseNotifications(notifications);
+                                //var notificationMsg = xDoc.Descendants((XNamespace)"http://docs.oasis-open.org/wsn/b-2" + "Notify")
+                                //    .First()
+                                //    .FirstNode;
+                                //Console.WriteLine(notificationMsg + "\n");
 
-                        XmlDocument x = new XmlDocument();
-                        x.LoadXml(xml);
+                                var notifications = xDoc.Descendants(onvifEvent + "Notify").Elements();
+                                ParseNotifications(notifications);
 
+                                XmlDocument x = new XmlDocument();
+                                x.LoadXml(xml);
+                            }
+                            else
+                            {
+                                // Null / empty string - don't process
+                                Debug.Print("Null or empty Xml string received - don't process");
+                                return;
+                            }
+                        }
+                        catch (HttpListenerException e)
+                        {
+                            Debug.Print(e.Message);
+                            return;
+                        }
                         //foreach (var item in notifications)
                         //{
                         //    Console.WriteLine(item.FirstAttribute.Name + " " + item.FirstAttribute.Value);
@@ -199,8 +216,16 @@ namespace OnvifEvents
 
         private static string GetXml(StreamReader reader)
         {
-            string xml = reader.ReadToEnd();  // Slow operation
-            return xml;
+            try
+            {
+                string xml = reader.ReadToEnd();  // Slow operation
+                return xml;
+            }
+            catch (HttpListenerException e)
+            {
+                Debug.Print(e.Message);
+                return string.Empty;
+            }
         }
 
         public static HttpListener GetHttpListener(int port)
