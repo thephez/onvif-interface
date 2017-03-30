@@ -12,7 +12,7 @@ using System.Xml;
 
 namespace OnvifEvents
 {
-    public partial class Form1 : Form
+    public partial class EventForm : Form
     {
         DateTime? SubTermTime;
         Timer SubRenewTimer = new Timer();
@@ -20,7 +20,7 @@ namespace OnvifEvents
         SubscriptionManagerClient SubscriptionManagerClient;
         OnvifHttpListener HttpListener = new OnvifHttpListener();
 
-        public Form1()
+        public EventForm()
         {
             InitializeComponent();
         }

@@ -25,7 +25,7 @@ namespace OnvifEvents
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new EventForm());
         }
 
         //public static string SendResponse(HttpListenerRequest request)

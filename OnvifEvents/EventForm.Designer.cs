@@ -1,6 +1,6 @@
 ﻿namespace OnvifEvents
 {
-    partial class Form1
+    partial class EventForm
     {
         /// <summary>
         /// Required designer variable.
