@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace OnvifEvents
+namespace SDS.Video.Onvif
 {
     public class OnvifHttpListener
     {
@@ -21,7 +21,7 @@ namespace OnvifEvents
 
         public void OnNotification(List<string> notifyMessages)
         {
-            NotificationEventArgs e = new NotificationEventArgs(notifyMessages);
+            HttpNotificationEventArgs e = new HttpNotificationEventArgs(notifyMessages);
             Notification?.Invoke(this, e);
         }
 
@@ -225,11 +225,11 @@ namespace OnvifEvents
     /// <summary>
     /// EventArgs based class for returning Onvif notifications from HttpListener
     /// </summary>
-    public class NotificationEventArgs : EventArgs
+    public class HttpNotificationEventArgs : EventArgs
     {
         public List<string> Notifications;
 
-        public NotificationEventArgs(List<string> notifications)
+        public HttpNotificationEventArgs(List<string> notifications)
         {
             Notifications = notifications;
         }

@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\OnvifEvents.cs" />
     <Compile Include="Classes\OnvifHttpListener.cs" />
     <Compile Include="Classes\OnvifPtz.cs" />
     <Compile Include="Classes\OnvifServices.cs" />
