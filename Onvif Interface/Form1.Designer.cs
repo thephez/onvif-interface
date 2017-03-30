@@ -71,6 +71,8 @@
             this.lblUser = new System.Windows.Forms.Label();
             this.lblPassword = new System.Windows.Forms.Label();
             this.chkShowPwd = new System.Windows.Forms.CheckBox();
+            this.lbxEvents = new System.Windows.Forms.ListBox();
+            this.lblEvents = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.gbxDeviceInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -110,7 +112,7 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tssLbl});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 534);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 640);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(866, 22);
             this.statusStrip1.TabIndex = 3;
@@ -160,8 +162,6 @@
             // 
             // gbxDeviceInfo
             // 
-            this.gbxDeviceInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.gbxDeviceInfo.Controls.Add(this.lblCapabilities);
             this.gbxDeviceInfo.Controls.Add(this.lbxCapabilities);
             this.gbxDeviceInfo.Controls.Add(this.lblModel);
@@ -221,8 +221,6 @@
             // 
             // gbxPtzControl
             // 
-            this.gbxPtzControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.gbxPtzControl.Controls.Add(this.lblPreset);
             this.gbxPtzControl.Controls.Add(this.btnPreset5);
             this.gbxPtzControl.Controls.Add(this.btnPreset4);
@@ -541,11 +539,32 @@
             this.chkShowPwd.Text = "Show Password";
             this.chkShowPwd.UseVisualStyleBackColor = true;
             // 
+            // lbxEvents
+            // 
+            this.lbxEvents.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.lbxEvents.FormattingEnabled = true;
+            this.lbxEvents.Location = new System.Drawing.Point(12, 539);
+            this.lbxEvents.Name = "lbxEvents";
+            this.lbxEvents.Size = new System.Drawing.Size(842, 82);
+            this.lbxEvents.TabIndex = 18;
+            // 
+            // lblEvents
+            // 
+            this.lblEvents.AutoSize = true;
+            this.lblEvents.Location = new System.Drawing.Point(12, 523);
+            this.lblEvents.Name = "lblEvents";
+            this.lblEvents.Size = new System.Drawing.Size(77, 13);
+            this.lblEvents.TabIndex = 19;
+            this.lblEvents.Text = "Device Events";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(866, 556);
+            this.ClientSize = new System.Drawing.Size(866, 662);
+            this.Controls.Add(this.lblEvents);
+            this.Controls.Add(this.lbxEvents);
             this.Controls.Add(this.chkShowPwd);
             this.Controls.Add(this.lblPassword);
             this.Controls.Add(this.lblUser);
@@ -561,6 +580,7 @@
             this.Controls.Add(this.txtIP);
             this.Name = "Form1";
             this.Text = "Onvif Test Client";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_Closing);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.gbxDeviceInfo.ResumeLayout(false);
@@ -620,6 +640,8 @@
         private System.Windows.Forms.Label lblUser;
         private System.Windows.Forms.Label lblPassword;
         private System.Windows.Forms.CheckBox chkShowPwd;
+        private System.Windows.Forms.ListBox lbxEvents;
+        private System.Windows.Forms.Label lblEvents;
     }
 }
 

@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\OnvifHttpListener.cs" />
     <Compile Include="Classes\OnvifPtz.cs" />
     <Compile Include="Classes\OnvifServices.cs" />
     <Compile Include="Classes\WsPasswordDigest.cs" />
@@ -64,6 +65,11 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service References\OnvifDeviceManagementServiceReference\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\OnvifEventServiceReference\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -357,6 +363,93 @@
     <None Include="Service References\OnvifDeviceManagementServiceReference\ws-addr.xsd" />
     <None Include="Service References\OnvifDeviceManagementServiceReference\xml.xsd" />
     <None Include="Service References\OnvifDeviceManagementServiceReference\xmlmime.xsd" />
+    <None Include="Service References\OnvifEventServiceReference\b-2.xsd" />
+    <None Include="Service References\OnvifEventServiceReference\bf-2.xsd" />
+    <None Include="Service References\OnvifEventServiceReference\event-vs.wsdl" />
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.Capabilities.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.CreatePullPointResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.CreatePullPointResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.CreatePullPointSubscriptionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.DestroyPullPointResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.DestroyPullPointResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.EndpointReferenceType.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.GetCurrentMessageResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.GetCurrentMessageResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.GetEventPropertiesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.GetMessagesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.GetMessagesResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.NotificationMessageHolderType.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.PauseSubscriptionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.PauseSubscriptionResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.PullMessagesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.RenewResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.RenewResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.ResumeSubscriptionResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.ResumeSubscriptionResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.SeekResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.SubscribeResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.SubscribeResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.TopicSetType.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.UnsubscribeResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\Onvif_Interface.OnvifEventServiceReference.UnsubscribeResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\OnvifEventServiceReference\r-2.xsd" />
+    <None Include="Service References\OnvifEventServiceReference\t-1.xsd" />
+    <None Include="Service References\OnvifEventServiceReference\ws-addr.xsd" />
+    <None Include="Service References\OnvifEventServiceReference\WS-BaseNotification.wsdl" />
+    <None Include="Service References\OnvifEventServiceReference\WS-Resource.wsdl" />
+    <None Include="Service References\OnvifEventServiceReference\xml.xsd" />
     <None Include="Service References\OnvifMediaServiceReference\b-2.xsd" />
     <None Include="Service References\OnvifMediaServiceReference\bf-2.xsd" />
     <None Include="Service References\OnvifMediaServiceReference\common.xsd" />
@@ -589,6 +682,7 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadataStorage Include="Service References\OnvifDeviceManagementServiceReference\" />
+    <WCFMetadataStorage Include="Service References\OnvifEventServiceReference\" />
     <WCFMetadataStorage Include="Service References\OnvifMediaServiceReference\" />
     <WCFMetadataStorage Include="Service References\OnvifPtzServiceReference\" />
   </ItemGroup>
@@ -624,6 +718,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Service References\OnvifMediaServiceReference\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\OnvifEventServiceReference\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\OnvifEventServiceReference\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\OnvifEventServiceReference\Reference.svcmap">
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>

@@ -8,6 +8,10 @@ using Onvif_Interface.OnvifPtzServiceReference;
 using System.ServiceModel.Description;
 using SDS.Video.Onvif;
 using System.Text;
+using OnvifEvents;
+using Onvif_Interface.OnvifEventServiceReference;
+using System.Net;
+using System.ServiceModel;
 
 namespace Onvif_Interface
 {
@@ -15,7 +19,13 @@ namespace Onvif_Interface
     {
         private string IP;
         private int Port;
+        OnvifHttpListener HttpListener = new OnvifHttpListener();
 
+        System.DateTime? SubTermTime;
+        Timer SubRenewTimer = new Timer();
+        string SubRenewUri;
+        SubscriptionManagerClient SubscriptionManagerClient;
+        
         public Form1()
         {
             InitializeComponent();
@@ -44,10 +54,140 @@ namespace Onvif_Interface
             //// If this is not set to false, the HTTP header includes "Expect: 100-Continue"
             //// This causes Samsung Onvif cameras to respond with error "417 - Expectation Failed"
             System.Net.ServicePointManager.Expect100Continue = false;
+
+            // Start http listener to receive events
+            HttpListener.StartHttpServer(8080);
+            HttpListener.Notification += HttpListener_Notification;
         }
+
+        private void HttpListener_Notification(object sender, EventArgs e)
+        {
+            lbxEvents.Items.Add("Notification(s) received");
+            NotificationEventArgs n = (NotificationEventArgs)e;
+
+            foreach (string notification in n.Notifications)
+            {
+                lbxEvents.Items.Add(string.Format("  {0}", notification));
+                Console.WriteLine(string.Format("  {0}", notification));
+            }
+
+            lbxEvents.SelectedIndex = lbxEvents.Items.Count - 1;
+        }
+
+        public void Subscribe(string ip, int port)
+        {
+            EventPortTypeClient eptc = OnvifServices.GetEventClient(ip, port, txtUser.Text, txtPassword.Text);
+
+            string localIP = GetLocalIp(); // "172.16.5.111";
+
+            // Producer client
+            NotificationProducerClient npc = OnvifServices.GetNotificationProducerClient(ip, port, txtUser.Text, txtPassword.Text);
+            npc.Endpoint.Address = eptc.Endpoint.Address;
+
+            Subscribe s = new Subscribe();
+            // Consumer reference tells the device where to Post messages back to (the client)
+            EndpointReferenceType clientEndpoint = new EndpointReferenceType() { Address = new AttributedURIType() { Value = string.Format("http://{0}:8080/subscription-1", localIP) } };
+            s.ConsumerReference = clientEndpoint;
+            s.InitialTerminationTime = "PT60S";
+
+            try
+            {
+                SubscribeResponse sr = npc.Subscribe(s);
+
+                // Store the subscription URI for use in Renew
+                SubRenewUri = sr.SubscriptionReference.Address.Value;
+
+                // Start timer to periodically check if a Renew request needs to be issued
+                // Use PC time for timer in case camera time doesn't match PC time
+                // This works fine because the renew command issues a relative time (i.e. PT60S) so PC/Camera mismatch doesn't matter
+                SubTermTime = System.DateTime.UtcNow.AddSeconds(50); // sr.TerminationTime;
+                SubRenewTimer.Start();
+                SubRenewTimer.Interval = 1000;
+                SubRenewTimer.Tick += SubRenewTimer_Tick;
+
+                lbxEvents.Items.Add(string.Format("Initial Termination Time: {0} (Current Time: {1})", SubTermTime, System.DateTime.UtcNow));
+
+                SubscriptionManagerClient = OnvifServices.GetSubscriptionManagerClient(SubRenewUri, txtUser.Text, txtPassword.Text);
+            }
+            catch (Exception e)
+            {
+                lbxEvents.Items.Add(string.Format("{0} Unable to subscribe to events on device [{1}]", System.DateTime.UtcNow, ip));
+            }
+        }
+
+        /// <summary>
+        /// Issues a subscription renew message ~10 seconds before the subscription's scheduled termination time
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SubRenewTimer_Tick(object sender, EventArgs e)
+        {
+            var timeDiff = SubTermTime - System.DateTime.UtcNow;
+            var x = timeDiff.Value.Ticks / TimeSpan.TicksPerSecond;
+            if (x < 10)
+            {
+                // Send renew
+                Renew();
+            }
+        }
+
+        /// <summary>
+        /// Renews the SubscriptionManagerClient's subscription
+        /// </summary>
+        public void Renew()
+        {
+            Console.WriteLine(System.DateTime.Now + "\tIssue subscription renew");
+            RenewResponse oRenewResult = SubscriptionManagerClient.Renew(new Renew() { TerminationTime = "PT60S" });
+            SubTermTime = oRenewResult.TerminationTime;
+            Console.WriteLine(string.Format("Current Time: {0}\tTermination Time: {1}", oRenewResult.CurrentTime.ToString(), oRenewResult.TerminationTime.Value.ToString()));
+            lbxEvents.Items.Add(string.Format("Subscription renewed - Current Time: {0}\tTermination Time: {1}", oRenewResult.CurrentTime.ToString(), oRenewResult.TerminationTime.Value.ToString()));
+            lbxEvents.SelectedIndex = lbxEvents.Items.Count - 1;
+        }
+
+        /// <summary>
+        /// Unsubscribes from the subscription in the SubscriptionManagerClient
+        /// </summary>
+        public void Unsubscribe()
+        {
+            if ((SubscriptionManagerClient != null) && ((SubscriptionManagerClient.State == CommunicationState.Opened) | (SubscriptionManagerClient.State == CommunicationState.Created)))
+            {
+                Unsubscribe u = new Unsubscribe();
+                UnsubscribeResponse oUnSubResult = SubscriptionManagerClient.Unsubscribe(u);
+                SubscriptionManagerClient.Close();
+                SubRenewTimer.Stop();
+
+                lbxEvents.Items.Add(string.Format("Subscription canceled - Current Time: {0}", System.DateTime.UtcNow));
+                lbxEvents.SelectedIndex = lbxEvents.Items.Count - 1;
+            }
+            else
+            {
+                lbxEvents.Items.Add(string.Format("No subscription to cancel - Current Time: {0}", System.DateTime.UtcNow));
+                lbxEvents.SelectedIndex = lbxEvents.Items.Count - 1;
+            }
+        }
+
+        public string GetLocalIp()
+        {
+            IPHostEntry host;
+            string localIP = "?";
+            host = Dns.GetHostEntry(Dns.GetHostName());
+
+            foreach (System.Net.IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    localIP = ip.ToString();
+                    return localIP;
+                }
+            }
+
+            throw new Exception("Local IP address not found");
+        }
+
 
         private void btnGetOnvifInfo_Click(object sender, EventArgs e)
         {
+            Unsubscribe();
             IP = txtIP.Text;
             Port = (int)numPort.Value;
 
@@ -56,6 +196,14 @@ namespace Onvif_Interface
             UseWaitCursor = true;
 
             ClearData();
+            try
+            {
+                Subscribe(IP, Port);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Exception: {0}", ex.Message), "Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
 
             try
             {
@@ -466,6 +614,11 @@ namespace Onvif_Interface
         {
             CheckBox chk = (CheckBox)sender;
             txtPassword.PasswordChar = chk.Checked ? '\0' : '*';
+        }
+
+        private void Form1_Closing(object sender, FormClosedEventArgs e)
+        {
+            Unsubscribe();
         }
     }
 }
