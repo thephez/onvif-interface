@@ -38,7 +38,7 @@ namespace SDS.Video.Onvif
             User = user;
             Password = password;
 
-            PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), Port, User, Password);
+            PtzClient = OnvifServices.GetOnvifPTZClient(ptzUri, User, Password);
             MediaClient = OnvifServices.GetOnvifMediaClient(mediaUri, User, Password);
         }
 

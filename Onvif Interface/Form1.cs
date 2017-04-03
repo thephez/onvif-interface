@@ -315,37 +315,6 @@ namespace Onvif_Interface
             File.AppendAllText("ptz.txt", string.Format("\nPTZ configs found: {0}", ptzConfigs.Length));
             File.AppendAllText("ptz.txt", string.Format("\nPTZ config - Name: {0}", ptzConfigs[0].Name));
             File.AppendAllText("ptz.txt", string.Format("\nPTZ config - Token: {0}", ptzConfigs[0].token));
-
-            try
-            {
-                // Add PTZ config to Media profile
-                //mediaClient.AddPTZConfiguration("Profile1", ptzConfigs[0].token);
-
-                try
-                {
-                    PTZSpeed velocity = new PTZSpeed();
-                    File.AppendAllText("ptz.txt", string.Format("\nSetting velocity"));
-
-                    //velocity.Zoom = new Vector1D() { x = ptzOptions.Spaces.ContinuousPanTiltVelocitySpace[0].XRange.Max, space = ptzOptions.Spaces.ContinuousZoomVelocitySpace[0].URI }; ;
-                    velocity.PanTilt = new Vector2D() { x = (float)-0.5, y = 0 }; ;
-                    //ptzService.GotoPreset(profileToken, presets[presets.Length - 1].token, velocity);
-
-                    //ptz.GotoHomePosition(profileToken, velocity);
-                    //ptzService.Stop(profileToken, true, false);
-                }
-                catch (Exception ex)
-                {
-                    File.AppendAllText("ptz.txt", string.Format("\nException trying to PTZ:\n\t{0}\n\tStack Trace: {1}", ex.Message, ex.StackTrace));
-                    if (ex.InnerException != null)
-                        File.AppendAllText("ptz.txt", string.Format("\n\tInner Exception: {0}", ex.InnerException));
-                    throw;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
-                throw;
-            }
         }
 
         private void UpdatePtzLocation(PTZClient ptzClient, string profileToken)
@@ -380,10 +349,6 @@ namespace Onvif_Interface
             //string nonce = "h3dfca1Z/E+Wm15KYE78mgUAAAAAAA==";
             //string date = "2017-03-08T17:11:48.000Z";
             //string digest = "kkj/3C2oLKU57bzYCMKLAKjbheo=";
-            //string password = "userpassword";
-            //string nonce = "LKqI6G/AikKCQrN0zqZFlg==";
-            //string date = "2010-09-16T07:50:45Z";
-            //string digest = "tuOSpGlFlIXsozq4HFNeeGeFLEI=";
 
             //GetWsPasswordDigest("admin", password, nonce, date, digest);
         }
