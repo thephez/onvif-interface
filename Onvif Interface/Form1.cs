@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Windows.Forms;
-
-using Onvif_Interface.OnvifDeviceManagementServiceReference;
-using System.ServiceModel.Discovery;
 using System.IO;
-using Onvif_Interface.OnvifPtzServiceReference;
+using System.Windows.Forms;
+using System.ServiceModel.Discovery;
 using System.ServiceModel.Description;
-using SDS.Video.Onvif;
 using System.Text;
-using Onvif_Interface.OnvifEventServiceReference;
 using System.Net;
 using System.ServiceModel;
+using System.Collections.Generic;
+using SDS.Video.Onvif;
+using Onvif_Interface.OnvifPtzServiceReference;
+using Onvif_Interface.OnvifDeviceManagementServiceReference;
 
 namespace Onvif_Interface
 {
@@ -18,6 +17,7 @@ namespace Onvif_Interface
     {
         private string IP;
         private int Port;
+        Dictionary<string, string> ServiceUris = new Dictionary<string, string>();
         OnvifHttpListener HttpListener = new OnvifHttpListener();
         OnvifEvents Event = new OnvifEvents();
         
@@ -88,15 +88,6 @@ namespace Onvif_Interface
             UseWaitCursor = true;
 
             ClearData();
-
-            try
-            {
-                Event.Subscribe(IP, Port, txtUser.Text, txtPassword.Text);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(string.Format("Exception: {0}", ex.Message), "Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
 
             try
             {
@@ -198,12 +189,15 @@ namespace Onvif_Interface
             if (capabilities.PTZ != null) { lbxCapabilities.Items.Add("PTZ"); }
 
             lbxCapabilities.Items.Add("");
+            ServiceUris.Clear();
 
             Service[] svc = client.GetServices(IncludeCapability: true);
             foreach (Service s in svc)
             {
                 Console.WriteLine(s.XAddr + " " + " " + s.Namespace);  // Not present on Axis + s.Capabilities.NamespaceURI);
                 lbxCapabilities.Items.Add(string.Format("{0}", s.Namespace));
+                ServiceUris.Add(s.Namespace, s.XAddr);
+
                 if (s.Capabilities != null)
                 {
                     foreach (System.Xml.XmlNode x in s.Capabilities)
@@ -229,7 +223,11 @@ namespace Onvif_Interface
         {
             lbxCapabilities.Items.Add("");
             lbxCapabilities.Items.Add("Media Info");
-            OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
+                        
+            //OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
+            string xaddr = ServiceUris["http://www.onvif.org/ver10/media/wsdl"];
+            OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(xaddr, txtUser.Text, txtPassword.Text);
+
             OnvifMediaServiceReference.VideoSource[] videoSources = mclient.GetVideoSources();
             foreach (OnvifMediaServiceReference.VideoSource v in videoSources)
             {
@@ -259,13 +257,15 @@ namespace Onvif_Interface
             // Create PTZ and Media object
             if (txtUser.Text != string.Empty)
             {
-                ptzService = OnvifServices.GetOnvifPTZClient(ip, port, txtUser.Text, txtPassword.Text);
-                mediaService = OnvifServices.GetOnvifMediaClient(ip, port, txtUser.Text, txtPassword.Text);
+                //ptzService = OnvifServices.GetOnvifPTZClient(ip, port, txtUser.Text, txtPassword.Text);
+                ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
+                //mediaService = OnvifServices.GetOnvifMediaClient(ip, port, txtUser.Text, txtPassword.Text);
+                mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], txtUser.Text, txtPassword.Text);
             }
             else
             {
-                ptzService = OnvifServices.GetOnvifPTZClient(ip, port);
-                mediaService = OnvifServices.GetOnvifMediaClient(ip, port);
+                ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"]);
+                mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris["http://www.onvif.org/ver10/media/wsdl"]);
             }
 
             lbxPtzInfo.Items.Add("Supported Operations");
@@ -279,7 +279,7 @@ namespace Onvif_Interface
         private void PTZTest(DeviceClient client, string ip, int port)
         {
             // Create Media object
-            OnvifMediaServiceReference.MediaClient mediaService = OnvifServices.GetOnvifMediaClient(ip, port);
+            OnvifMediaServiceReference.MediaClient mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris["http://www.onvif.org/ver10/media/wsdl"]);
 
             // Create PTZ object
             PTZClient ptzService = OnvifServices.GetOnvifPTZClient(ip, port); // new PTZClient(client.Endpoint.Binding, client.Endpoint.Address);
@@ -380,10 +380,10 @@ namespace Onvif_Interface
             //string nonce = "h3dfca1Z/E+Wm15KYE78mgUAAAAAAA==";
             //string date = "2017-03-08T17:11:48.000Z";
             //string digest = "kkj/3C2oLKU57bzYCMKLAKjbheo=";
-            string password = "userpassword";
-            string nonce = "LKqI6G/AikKCQrN0zqZFlg==";
-            string date = "2010-09-16T07:50:45Z";
-            string digest = "tuOSpGlFlIXsozq4HFNeeGeFLEI=";
+            //string password = "userpassword";
+            //string nonce = "LKqI6G/AikKCQrN0zqZFlg==";
+            //string date = "2010-09-16T07:50:45Z";
+            //string digest = "tuOSpGlFlIXsozq4HFNeeGeFLEI=";
 
             //GetWsPasswordDigest("admin", password, nonce, date, digest);
         }
@@ -417,6 +417,7 @@ namespace Onvif_Interface
         {
             lbxCapabilities.Items.Clear();
             lbxPtzInfo.Items.Clear();
+            lbxEvents.Items.Clear();
 
             lblFirmware.Text = "Firmware:";
             lblModel.Text = "Model:";
@@ -519,6 +520,18 @@ namespace Onvif_Interface
         private void Form1_Closing(object sender, FormClosedEventArgs e)
         {
             Event?.Unsubscribe();
+        }
+
+        private void btnSubscribe_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Event.Subscribe(IP, Port, txtUser.Text, txtPassword.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("Exception: {0}", ex.Message), "Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
         }
     }
 }

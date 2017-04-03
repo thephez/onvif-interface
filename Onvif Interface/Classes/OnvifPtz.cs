@@ -33,6 +33,15 @@ namespace SDS.Video.Onvif
             MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, User, Password);
         }
 
+        public OnvifPtz(string mediaUri, string ptzUri, string user, string password)
+        {
+            User = user;
+            Password = password;
+
+            PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), Port, User, Password);
+            MediaClient = OnvifServices.GetOnvifMediaClient(mediaUri, User, Password);
+        }
+
         /// <summary>
         /// Gets the first media profile that contains a PTZConfiguration from the the MediaClient GetProfiles command
         /// </summary>

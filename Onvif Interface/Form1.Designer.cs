@@ -73,6 +73,7 @@
             this.chkShowPwd = new System.Windows.Forms.CheckBox();
             this.lbxEvents = new System.Windows.Forms.ListBox();
             this.lblEvents = new System.Windows.Forms.Label();
+            this.btnSubscribe = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.gbxDeviceInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -558,11 +559,22 @@
             this.lblEvents.TabIndex = 19;
             this.lblEvents.Text = "Device Events";
             // 
+            // btnSubscribe
+            // 
+            this.btnSubscribe.Location = new System.Drawing.Point(12, 490);
+            this.btnSubscribe.Name = "btnSubscribe";
+            this.btnSubscribe.Size = new System.Drawing.Size(127, 30);
+            this.btnSubscribe.TabIndex = 20;
+            this.btnSubscribe.Text = "Subscribe to Events";
+            this.btnSubscribe.UseVisualStyleBackColor = true;
+            this.btnSubscribe.Click += new System.EventHandler(this.btnSubscribe_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(866, 662);
+            this.Controls.Add(this.btnSubscribe);
             this.Controls.Add(this.lblEvents);
             this.Controls.Add(this.lbxEvents);
             this.Controls.Add(this.chkShowPwd);
@@ -642,6 +654,7 @@
         private System.Windows.Forms.CheckBox chkShowPwd;
         private System.Windows.Forms.ListBox lbxEvents;
         private System.Windows.Forms.Label lblEvents;
+        private System.Windows.Forms.Button btnSubscribe;
     }
 }
 
