@@ -26,12 +26,14 @@ namespace SDS.Video.Onvif
         }
 
         /// <summary>
-        /// Start a persistent HttpListener on the provided port
+        /// Start a persistent HttpListener on the provided port/prefix.
+        /// Listener will be created as "http://*:[port]/[prefix]/" (i.e. "http://*:8080/subscription-1/")
         /// </summary>
         /// <param name="port">TCP Port to listen to</param>
-        public async void StartHttpServer(int port)
+        /// <param name="prefix">Prefix to listen on (i.e. subscription-1)</param>
+        public async void StartHttpServer(int port, string prefix = "subscription-1")
         {
-            http = GetHttpListener(port);
+            http = GetHttpListener(port, prefix);
             Console.WriteLine(string.Format("\nStarting Http Listener on port {0}\n", port));
             http.Start();
             IsListening = http.IsListening;
@@ -90,22 +92,16 @@ namespace SDS.Video.Onvif
                         {
                             Task<string> task = Task.Run(() => GetXml(reader));
                             string xml = await task;
-                            //Console.WriteLine(xml);
+
                             Console.WriteLine(string.Format("{0} XML read complete", DateTime.Now.ToString("hh.mm.ss.ffffff")));
 
-                            if (xml != null && xml != string.Empty)
+                            if (!string.IsNullOrEmpty(xml))
                             {
                                 XDocument xDoc = XDocument.Load(new StringReader(xml));
                                 Console.WriteLine(string.Format("{0} xDoc loaded", DateTime.Now.ToString("hh.mm.ss.ffffff")));
 
                                 XNamespace onvifEvent = XNamespace.Get("http://docs.oasis-open.org/wsn/b-2");
-
                                 //ScanElements(xDoc.Elements());
-
-                                //var notificationMsg = xDoc.Descendants((XNamespace)"http://docs.oasis-open.org/wsn/b-2" + "Notify")
-                                //    .First()
-                                //    .FirstNode;
-                                //Console.WriteLine(notificationMsg + "\n");
 
                                 var notifications = xDoc.Descendants(onvifEvent + "Notify").Elements();
                                 ParseNotifications(notifications);
@@ -186,6 +182,11 @@ namespace SDS.Video.Onvif
             OnNotification(notifyMessages);
         }
 
+        /// <summary>
+        /// Call .ReadToEnd() on the provided StreamReader and return the result (can be slow - recommend calling as Task using an await)
+        /// </summary>
+        /// <param name="reader">StreamReader to read</param>
+        /// <returns>String of all data from reader</returns>
         private static string GetXml(StreamReader reader)
         {
             try
@@ -200,10 +201,10 @@ namespace SDS.Video.Onvif
             }
         }
 
-        public static HttpListener GetHttpListener(int port)
+        private static HttpListener GetHttpListener(int port, string prefix)
         {
             HttpListener http = new HttpListener();
-            http.Prefixes.Add(string.Format("http://*:{0}/subscription-1/", port));
+            http.Prefixes.Add(string.Format("http://*:{0}/{1}/", port, prefix));
 
             return http;
         }
