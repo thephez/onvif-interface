@@ -409,7 +409,6 @@ namespace Onvif_Interface
         private void BtnPanRight_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Pan(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
@@ -418,7 +417,6 @@ namespace Onvif_Interface
         private void BtnTiltUp_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Tilt(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
@@ -427,7 +425,6 @@ namespace Onvif_Interface
         private void BtnTiltDown_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Tilt(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
@@ -436,7 +433,6 @@ namespace Onvif_Interface
         private void BtnZoomOut_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Zoom(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
@@ -445,7 +441,6 @@ namespace Onvif_Interface
         private void BtnZoomIn_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Zoom(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
@@ -454,7 +449,6 @@ namespace Onvif_Interface
         private void BtnPreset_Click(object sender, EventArgs e)
         {
             Button btn = (Button)sender;
-            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
             OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             try
             {
