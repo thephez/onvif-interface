@@ -282,7 +282,7 @@ namespace Onvif_Interface
             OnvifMediaServiceReference.MediaClient mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris["http://www.onvif.org/ver10/media/wsdl"]);
 
             // Create PTZ object
-            PTZClient ptzService = OnvifServices.GetOnvifPTZClient(ip, port); // new PTZClient(client.Endpoint.Binding, client.Endpoint.Address);
+            PTZClient ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"]); // ip, port); // new PTZClient(client.Endpoint.Binding, client.Endpoint.Address);
 
             // Get target profile
             OnvifMediaServiceReference.Profile[] mediaProfiles = mediaService.GetProfiles();
@@ -335,7 +335,8 @@ namespace Onvif_Interface
 
         private void PtzStop()
         {
-            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Stop();
         }
 
@@ -399,7 +400,8 @@ namespace Onvif_Interface
         private void BtnPanLeft_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Pan(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -407,7 +409,8 @@ namespace Onvif_Interface
         private void BtnPanRight_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Pan(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -415,7 +418,8 @@ namespace Onvif_Interface
         private void BtnTiltUp_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Tilt(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -423,7 +427,8 @@ namespace Onvif_Interface
         private void BtnTiltDown_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Tilt(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -431,7 +436,8 @@ namespace Onvif_Interface
         private void BtnZoomOut_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Zoom(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -439,7 +445,8 @@ namespace Onvif_Interface
         private void BtnZoomIn_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Zoom(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -447,7 +454,8 @@ namespace Onvif_Interface
         private void BtnPreset_Click(object sender, EventArgs e)
         {
             Button btn = (Button)sender;
-            OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             try
             {
                 ptz.ShowPreset(Convert.ToInt32(btn.Text));
@@ -489,13 +497,20 @@ namespace Onvif_Interface
 
         private void btnSubscribe_Click(object sender, EventArgs e)
         {
-            try
+            if (ServiceUris.ContainsKey("http://www.onvif.org/ver10/events/wsdl"))
             {
-                Event.Subscribe(IP, Port, txtUser.Text, txtPassword.Text);
+                try
+                {
+                    Event.Subscribe(ServiceUris["http://www.onvif.org/ver10/events/wsdl"], txtUser.Text, txtPassword.Text);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(string.Format("Exception: {0}", ex.Message), "Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show(string.Format("Exception: {0}", ex.Message), "Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                lbxEvents.Items.Add("Warning: No subscription reference found for device.  Subscription cannot be activated.");
             }
         }
     }

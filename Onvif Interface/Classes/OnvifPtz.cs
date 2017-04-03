@@ -6,37 +6,40 @@ namespace SDS.Video.Onvif
 {
     class OnvifPtz
     {
-        private System.Net.IPAddress IP;
-        private int Port;
+        //private System.Net.IPAddress IP;
+        //private int Port;
         private string User;
         private string Password;
         private PTZClient PtzClient;
         private Onvif_Interface.OnvifMediaServiceReference.MediaClient MediaClient;
         public bool PtzAvailable;
 
-        public OnvifPtz(string ip, int port)
-        {
-            System.Net.IPAddress.TryParse(ip, out IP);
-            Port = port;
-            PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), port);
-            MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port);
-        }
+        //public OnvifPtz(string ip, int port)
+        //{
+        //    System.Net.IPAddress.TryParse(ip, out IP);
+        //    Port = port;
+        //    PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), port);
+        //    MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port);
+        //}
 
-        public OnvifPtz(string ip, int port, string user, string password)
-        {
-            System.Net.IPAddress.TryParse(ip, out IP);
-            Port = port;
-            User = user;
-            Password = password;
+        //public OnvifPtz(string ip, int port, string user, string password)
+        //{
+        //    System.Net.IPAddress.TryParse(ip, out IP);
+        //    Port = port;
+        //    User = user;
+        //    Password = password;
 
-            PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), Port, User, Password);
-            MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, User, Password);
-        }
+        //    PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), Port, User, Password);
+        //    MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, User, Password);
+        //}
 
         public OnvifPtz(string mediaUri, string ptzUri, string user, string password)
         {
             User = user;
             Password = password;
+
+            if (string.IsNullOrEmpty(mediaUri) | string.IsNullOrEmpty(ptzUri))
+                throw new Exception("Media and/or PTZ URI is empty or null.  PTZ object cannot be created");
 
             PtzClient = OnvifServices.GetOnvifPTZClient(ptzUri, User, Password);
             MediaClient = OnvifServices.GetOnvifMediaClient(mediaUri, User, Password);

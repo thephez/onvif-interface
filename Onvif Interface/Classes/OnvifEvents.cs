@@ -23,18 +23,17 @@ namespace SDS.Video.Onvif
         /// <summary>
         /// Subscribes to all events provided by the device and directs to :8080/subscription-1 Http listener
         /// </summary>
-        /// <param name="ip">IP Address of camera</param>
-        /// <param name="port">TCP port of camera</param>
+        /// <param name="uri">XAddr URI for Onvif events</param>
         /// <param name="username">User</param>
         /// <param name="password">Password</param>
-        public void Subscribe(string ip, int port, string username, string password)
+        public void Subscribe(string uri, string username, string password)
         {
-            EventPortTypeClient eptc = OnvifServices.GetEventClient(ip, port, username, password);
+            EventPortTypeClient eptc = OnvifServices.GetEventClient(uri, username, password);
 
             string localIP = GetLocalIp();
 
             // Producer client
-            NotificationProducerClient npc = OnvifServices.GetNotificationProducerClient(ip, port, username, password);
+            NotificationProducerClient npc = OnvifServices.GetNotificationProducerClient(uri, username, password); // ip, port, username, password);
             npc.Endpoint.Address = eptc.Endpoint.Address;
 
             Subscribe s = new Subscribe();
@@ -64,7 +63,7 @@ namespace SDS.Video.Onvif
             }
             catch (Exception e)
             {
-                OnNotification(string.Format("{0} Unable to subscribe to events on device [{1}]", System.DateTime.UtcNow, ip));
+                OnNotification(string.Format("{0} Unable to subscribe to events on device [{1}]", System.DateTime.UtcNow, uri)); // ip));
             }
         }
 

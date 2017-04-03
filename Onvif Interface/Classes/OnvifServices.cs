@@ -34,28 +34,28 @@ namespace SDS.Video.Onvif
             return deviceClient;
         }
 
-        public static Onvif_Interface.OnvifMediaServiceReference.MediaClient GetOnvifMediaClient(string ip, int port, string username = "", string password = "")
-        {
-            EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/media_service", ip, port));
+        //public static Onvif_Interface.OnvifMediaServiceReference.MediaClient GetOnvifMediaClient(string ip, int port, string username = "", string password = "")
+        //{
+        //    EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/media_service", ip, port));
 
-            HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
-            httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
+        //    HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
+        //    httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
 
-            var messageElement = new TextMessageEncodingBindingElement();
-            messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
-            CustomBinding bind = new CustomBinding(messageElement, httpBinding);
+        //    var messageElement = new TextMessageEncodingBindingElement();
+        //    messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
+        //    CustomBinding bind = new CustomBinding(messageElement, httpBinding);
 
-            Onvif_Interface.OnvifMediaServiceReference.MediaClient mediaClient = new Onvif_Interface.OnvifMediaServiceReference.MediaClient(bind, serviceAddress);
+        //    Onvif_Interface.OnvifMediaServiceReference.MediaClient mediaClient = new Onvif_Interface.OnvifMediaServiceReference.MediaClient(bind, serviceAddress);
 
-            if (username != string.Empty)
-            {
-                // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
-                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
-                mediaClient.Endpoint.Behaviors.Add(behavior);
-            }
+        //    if (username != string.Empty)
+        //    {
+        //        // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
+        //        PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
+        //        mediaClient.Endpoint.Behaviors.Add(behavior);
+        //    }
 
-            return mediaClient;
-        }
+        //    return mediaClient;
+        //}
 
         public static Onvif_Interface.OnvifMediaServiceReference.MediaClient GetOnvifMediaClient(string Uri, string username = "", string password = "")
         {
@@ -80,28 +80,28 @@ namespace SDS.Video.Onvif
             return mediaClient;
         }
 
-        public static PTZClient GetOnvifPTZClient(string ip, int port, string username = "", string password = "")
-        {
-            EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/ptz_service", ip, port));
+        //public static PTZClient GetOnvifPTZClient(string ip, int port, string username = "", string password = "")
+        //{
+        //    EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/ptz_service", ip, port));
 
-            HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
-            httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
+        //    HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
+        //    httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
 
-            var messageElement = new TextMessageEncodingBindingElement();
-            messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
-            CustomBinding bind = new CustomBinding(messageElement, httpBinding);
+        //    var messageElement = new TextMessageEncodingBindingElement();
+        //    messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
+        //    CustomBinding bind = new CustomBinding(messageElement, httpBinding);
 
-            PTZClient ptzClient = new PTZClient(bind, serviceAddress);
+        //    PTZClient ptzClient = new PTZClient(bind, serviceAddress);
 
-            if (username != string.Empty)
-            {
-                // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
-                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
-                ptzClient.Endpoint.Behaviors.Add(behavior);
-            }
+        //    if (username != string.Empty)
+        //    {
+        //        // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
+        //        PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
+        //        ptzClient.Endpoint.Behaviors.Add(behavior);
+        //    }
 
-            return ptzClient;
-        }
+        //    return ptzClient;
+        //}
 
         public static PTZClient GetOnvifPTZClient(string Uri, string username = "", string password = "")
         {
@@ -149,9 +149,32 @@ namespace SDS.Video.Onvif
         //    return deviceClient;
         //}
 
-        public static EventPortTypeClient GetEventClient(string ip, int port, string username = "", string password = "")
+        //public static EventPortTypeClient GetEventClient(string ip, int port, string username = "", string password = "")
+        //{
+        //    EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/event_service", ip, port));
+
+        //    HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
+        //    httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
+
+        //    var messageElement = new TextMessageEncodingBindingElement();
+        //    messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
+        //    CustomBinding bind = new CustomBinding(messageElement, httpBinding);
+
+        //    EventPortTypeClient client = new EventPortTypeClient(bind, serviceAddress);
+
+        //    if (username != string.Empty)
+        //    {
+        //        // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
+        //        PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
+        //        client.Endpoint.Behaviors.Add(behavior);
+        //    }
+
+        //    return client;
+        //}
+
+        public static EventPortTypeClient GetEventClient(string uri, string username = "", string password = "")
         {
-            EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/event_service", ip, port));
+            EndpointAddress serviceAddress = new EndpointAddress(uri);
 
             HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
             httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
@@ -195,9 +218,32 @@ namespace SDS.Video.Onvif
             return client;
         }
 
-        public static NotificationProducerClient GetNotificationProducerClient(string ip, int port, string username = "", string password = "")
+        //public static NotificationProducerClient GetNotificationProducerClient(string ip, int port, string username = "", string password = "")
+        //{
+        //    EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/event_service", ip, port));
+
+        //    HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
+        //    httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
+
+        //    var messageElement = new TextMessageEncodingBindingElement();
+        //    messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.WSAddressing10);
+        //    CustomBinding bind = new CustomBinding(messageElement, httpBinding);
+
+        //    NotificationProducerClient client = new NotificationProducerClient(bind, serviceAddress);
+
+        //    if (username != string.Empty)
+        //    {
+        //        // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
+        //        PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
+        //        client.Endpoint.Behaviors.Add(behavior);
+        //    }
+
+        //    return client;
+        //}
+
+        public static NotificationProducerClient GetNotificationProducerClient(string uri, string username = "", string password = "")
         {
-            EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/event_service", ip, port));
+            EndpointAddress serviceAddress = new EndpointAddress(uri);
 
             HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
             httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
@@ -217,6 +263,5 @@ namespace SDS.Video.Onvif
 
             return client;
         }
-
     }
 }
