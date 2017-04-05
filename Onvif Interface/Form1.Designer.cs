@@ -192,6 +192,7 @@
             this.lbxCapabilities.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.lbxCapabilities.FormattingEnabled = true;
+            this.lbxCapabilities.HorizontalScrollbar = true;
             this.lbxCapabilities.Location = new System.Drawing.Point(9, 127);
             this.lbxCapabilities.Name = "lbxCapabilities";
             this.lbxCapabilities.Size = new System.Drawing.Size(245, 316);

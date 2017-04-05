@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using SDS.Video.Onvif;
 using Onvif_Interface.OnvifPtzServiceReference;
 using Onvif_Interface.OnvifDeviceManagementServiceReference;
+using Onvif_Interface.OnvifMediaServiceReference;
 
 namespace Onvif_Interface
 {
@@ -20,7 +21,7 @@ namespace Onvif_Interface
         Dictionary<string, string> ServiceUris = new Dictionary<string, string>();
         OnvifHttpListener HttpListener = new OnvifHttpListener();
         OnvifEvents Event = new OnvifEvents();
-        
+
         public Form1()
         {
             InitializeComponent();
@@ -223,9 +224,9 @@ namespace Onvif_Interface
         {
             lbxCapabilities.Items.Add("");
             lbxCapabilities.Items.Add("Media Info");
-                        
+
             //OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
-            string xaddr = ServiceUris["http://www.onvif.org/ver10/media/wsdl"];
+            string xaddr = ServiceUris[OnvifNamespace.MEDIA];
             OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(xaddr, txtUser.Text, txtPassword.Text);
 
             OnvifMediaServiceReference.VideoSource[] videoSources = mclient.GetVideoSources();
@@ -239,6 +240,28 @@ namespace Onvif_Interface
             {
                 string pInfo = string.Format("  Profile {0}: Token={1}", p.Name, p.token);
                 lbxCapabilities.Items.Add(string.Format("{0}", pInfo));
+
+                List<string> uris = GetMediaProfileUris(mclient, p);
+                foreach (string u in uris)
+                {
+                    lbxCapabilities.Items.Add(string.Format("    URI: {0}", u));
+                }
+                //StreamSetup ss = new OnvifMediaServiceReference.StreamSetup()
+                //{
+                //    Stream = OnvifMediaServiceReference.StreamType.RTPUnicast,
+                //    Transport = new OnvifMediaServiceReference.Transport() { Protocol = OnvifMediaServiceReference.TransportProtocol.RTSP }
+                //};
+
+                //OnvifMediaServiceReference.MediaUri mu = mclient.GetStreamUri(ss, p.token);
+                //lbxCapabilities.Items.Add(string.Format("    Unicast URI: {0}", mu.Uri));
+
+                //try
+                //{
+                //    ss.Stream = OnvifMediaServiceReference.StreamType.RTPMulticast;
+                //    mu = mclient.GetStreamUri(ss, p.token);
+                //    lbxCapabilities.Items.Add(string.Format("    Multicast URI: {0}", mu.Uri));
+                //}
+                //catch { }
             }
 
             //var sn = mclient.GetSnapshotUri(mProfiles[0].token);
@@ -247,6 +270,86 @@ namespace Onvif_Interface
             //{
             //    OnvifMediaServiceReference.MetadataConfigurationOptions mco = mclient.GetMetadataConfigurationOptions(mc.token, mProfiles[0].token);
             //}
+        }
+
+        private List<string> GetMediaProfileUris(MediaClient mclient, Profile p)
+        {
+            List<string> uris = new List<string>();
+            StreamSetup ss = new StreamSetup();
+
+            // Unicast options
+            ss.Stream = StreamType.RTPUnicast;
+
+            ss.Transport = new Transport() { Protocol = TransportProtocol.HTTP };
+
+            try
+            {
+                MediaUri mu = mclient.GetStreamUri(ss, p.token);
+                uris.Add(ss.Transport.Protocol.ToString() + "\t" + mu.Uri + " (" + ss.Stream.ToString() + ")");
+            }
+            catch { };
+
+            ss.Transport = new Transport() { Protocol = TransportProtocol.RTSP };
+            try
+            {
+                MediaUri mu = mclient.GetStreamUri(ss, p.token);
+                uris.Add(ss.Transport.Protocol.ToString() + "\t" + mu.Uri + " (" + ss.Stream.ToString() + ")");
+            }
+            catch { };
+
+            ss.Transport = new Transport() { Protocol = TransportProtocol.TCP };
+            try
+            {
+                MediaUri mu = mclient.GetStreamUri(ss, p.token);
+                uris.Add(ss.Transport.Protocol.ToString() + "\t" + mu.Uri + " (" + ss.Stream.ToString() + ")");
+            }
+            catch { };
+
+            ss.Transport = new Transport() { Protocol = TransportProtocol.UDP };
+            try
+            {
+                MediaUri mu = mclient.GetStreamUri(ss, p.token);
+                uris.Add(ss.Transport.Protocol.ToString() + "\t" + mu.Uri + " (" + ss.Stream.ToString() + ")");
+            }
+            catch { };
+
+            // Multicast options
+            ss.Stream = StreamType.RTPMulticast;
+
+            ss.Transport = new Transport() { Protocol = TransportProtocol.HTTP };
+
+            try
+            {
+                MediaUri mu = mclient.GetStreamUri(ss, p.token);
+                uris.Add(ss.Transport.Protocol.ToString() + "\t" + mu.Uri + " (" + ss.Stream.ToString() + ")");
+            }
+            catch { };
+
+            ss.Transport = new Transport() { Protocol = TransportProtocol.RTSP };
+            try
+            {
+                MediaUri mu = mclient.GetStreamUri(ss, p.token);
+                uris.Add(ss.Transport.Protocol.ToString() + "\t" + mu.Uri + " (" + ss.Stream.ToString() + ")");
+            }
+            catch { };
+
+            ss.Transport = new Transport() { Protocol = TransportProtocol.TCP };
+            try
+            {
+                MediaUri mu = mclient.GetStreamUri(ss, p.token);
+                uris.Add(ss.Transport.Protocol.ToString() + "\t" + mu.Uri + " (" + ss.Stream.ToString() + ")");
+            }
+            catch { };
+
+            ss.Transport = new Transport() { Protocol = TransportProtocol.UDP };
+            try
+            {
+                MediaUri mu = mclient.GetStreamUri(ss, p.token);
+                uris.Add(ss.Transport.Protocol.ToString() + "\t" + mu.Uri + " (" + ss.Stream.ToString() + ")");
+            }
+            catch { };
+
+            return uris;
         }
 
         private void GetPtzServices(string ip, int port)
@@ -260,12 +363,12 @@ namespace Onvif_Interface
                 //ptzService = OnvifServices.GetOnvifPTZClient(ip, port, txtUser.Text, txtPassword.Text);
                 ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
                 //mediaService = OnvifServices.GetOnvifMediaClient(ip, port, txtUser.Text, txtPassword.Text);
-                mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], txtUser.Text, txtPassword.Text);
+                mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris[OnvifNamespace.MEDIA], txtUser.Text, txtPassword.Text);
             }
             else
             {
                 ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"]);
-                mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris["http://www.onvif.org/ver10/media/wsdl"]);
+                mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris[OnvifNamespace.MEDIA]);
             }
 
             lbxPtzInfo.Items.Add("Supported Operations");
@@ -279,7 +382,7 @@ namespace Onvif_Interface
         private void PTZTest(DeviceClient client, string ip, int port)
         {
             // Create Media object
-            OnvifMediaServiceReference.MediaClient mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris["http://www.onvif.org/ver10/media/wsdl"]);
+            OnvifMediaServiceReference.MediaClient mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris[OnvifNamespace.MEDIA]);
 
             // Create PTZ object
             PTZClient ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"]); // ip, port); // new PTZClient(client.Endpoint.Binding, client.Endpoint.Address);
@@ -311,7 +414,7 @@ namespace Onvif_Interface
             // Fails if not a PTZ
             OnvifPtzServiceReference.PTZNode node = ptzService.GetNode("1"); // nodes[0].token);
 
-            PTZConfiguration[] ptzConfigs = ptzService.GetConfigurations();
+            OnvifPtzServiceReference.PTZConfiguration[] ptzConfigs = ptzService.GetConfigurations();
             File.AppendAllText("ptz.txt", string.Format("\nPTZ configs found: {0}", ptzConfigs.Length));
             File.AppendAllText("ptz.txt", string.Format("\nPTZ config - Name: {0}", ptzConfigs[0].Name));
             File.AppendAllText("ptz.txt", string.Format("\nPTZ config - Token: {0}", ptzConfigs[0].token));
@@ -336,7 +439,7 @@ namespace Onvif_Interface
         private void PtzStop()
         {
             //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
-            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Stop();
         }
 
@@ -401,7 +504,7 @@ namespace Onvif_Interface
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
             //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
-            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Pan(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -409,7 +512,7 @@ namespace Onvif_Interface
         private void BtnPanRight_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Pan(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -417,7 +520,7 @@ namespace Onvif_Interface
         private void BtnTiltUp_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Tilt(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -425,7 +528,7 @@ namespace Onvif_Interface
         private void BtnTiltDown_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Tilt(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -433,7 +536,7 @@ namespace Onvif_Interface
         private void BtnZoomOut_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Zoom(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -441,7 +544,7 @@ namespace Onvif_Interface
         private void BtnZoomIn_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             ptz.Zoom(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -449,7 +552,7 @@ namespace Onvif_Interface
         private void BtnPreset_Click(object sender, EventArgs e)
         {
             Button btn = (Button)sender;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris["http://www.onvif.org/ver10/media/wsdl"], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], txtUser.Text, txtPassword.Text);
             try
             {
                 ptz.ShowPreset(Convert.ToInt32(btn.Text));
@@ -491,11 +594,11 @@ namespace Onvif_Interface
 
         private void btnSubscribe_Click(object sender, EventArgs e)
         {
-            if (ServiceUris.ContainsKey("http://www.onvif.org/ver10/events/wsdl"))
+            if (ServiceUris.ContainsKey(OnvifNamespace.EVENTS))
             {
                 try
                 {
-                    Event.Subscribe(ServiceUris["http://www.onvif.org/ver10/events/wsdl"], txtUser.Text, txtPassword.Text);
+                    Event.Subscribe(ServiceUris[OnvifNamespace.EVENTS], txtUser.Text, txtPassword.Text);
                 }
                 catch (Exception ex)
                 {
