@@ -246,22 +246,6 @@ namespace Onvif_Interface
                 {
                     lbxCapabilities.Items.Add(string.Format("    URI: {0}", u));
                 }
-                //StreamSetup ss = new OnvifMediaServiceReference.StreamSetup()
-                //{
-                //    Stream = OnvifMediaServiceReference.StreamType.RTPUnicast,
-                //    Transport = new OnvifMediaServiceReference.Transport() { Protocol = OnvifMediaServiceReference.TransportProtocol.RTSP }
-                //};
-
-                //OnvifMediaServiceReference.MediaUri mu = mclient.GetStreamUri(ss, p.token);
-                //lbxCapabilities.Items.Add(string.Format("    Unicast URI: {0}", mu.Uri));
-
-                //try
-                //{
-                //    ss.Stream = OnvifMediaServiceReference.StreamType.RTPMulticast;
-                //    mu = mclient.GetStreamUri(ss, p.token);
-                //    lbxCapabilities.Items.Add(string.Format("    Multicast URI: {0}", mu.Uri));
-                //}
-                //catch { }
             }
 
             //var sn = mclient.GetSnapshotUri(mProfiles[0].token);
