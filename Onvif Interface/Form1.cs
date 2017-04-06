@@ -192,7 +192,7 @@ namespace Onvif_Interface
             lbxCapabilities.Items.Add("");
             ServiceUris.Clear();
 
-            Service[] svc = client.GetServices(IncludeCapability: true);
+            Service[] svc = client.GetServices(IncludeCapability: true); // Bosch Autodome 800 response can't be deserialized if IncludeCapability enabled
             foreach (Service s in svc)
             {
                 Console.WriteLine(s.XAddr + " " + " " + s.Namespace);  // Not present on Axis + s.Capabilities.NamespaceURI);
@@ -238,7 +238,8 @@ namespace Onvif_Interface
             OnvifMediaServiceReference.Profile[] mProfiles = mclient.GetProfiles();
             foreach (OnvifMediaServiceReference.Profile p in mProfiles)
             {
-                string pInfo = string.Format("  Profile {0}: Token={1}", p.Name, p.token);
+                string ptz = p.PTZConfiguration != null ? "Yes" : "No";
+                string pInfo = string.Format("  Profile {0}: Token={1}, PTZ={2}", p.Name, p.token, ptz);
                 lbxCapabilities.Items.Add(string.Format("{0}", pInfo));
 
                 List<string> uris = GetMediaProfileUris(mclient, p);
