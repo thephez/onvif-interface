@@ -34,6 +34,29 @@ namespace SDS.Video.Onvif
             return deviceClient;
         }
 
+        public static DeviceClient GetOnvifDeviceClient(string ip, int port, double deviceTimeOffset, string username = "", string password = "")
+        {
+            EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/device_service", ip, port));
+
+            HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
+            httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
+
+            var messageElement = new TextMessageEncodingBindingElement();
+            messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
+            CustomBinding bind = new CustomBinding(messageElement, httpBinding);
+
+            DeviceClient deviceClient = new DeviceClient(bind, serviceAddress);
+
+            if (username != string.Empty)
+            {
+                // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
+                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password, deviceTimeOffset);
+                deviceClient.Endpoint.Behaviors.Add(behavior);
+            }
+
+            return deviceClient;
+        }
+
         //public static Onvif_Interface.OnvifMediaServiceReference.MediaClient GetOnvifMediaClient(string ip, int port, string username = "", string password = "")
         //{
         //    EndpointAddress serviceAddress = new EndpointAddress(string.Format("http://{0}:{1}/onvif/media_service", ip, port));
@@ -74,6 +97,29 @@ namespace SDS.Video.Onvif
             {
                 // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
                 PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
+                mediaClient.Endpoint.Behaviors.Add(behavior);
+            }
+
+            return mediaClient;
+        }
+
+        public static Onvif_Interface.OnvifMediaServiceReference.MediaClient GetOnvifMediaClient(string Uri, double deviceTimeOffset, string username = "", string password = "")
+        {
+            EndpointAddress serviceAddress = new EndpointAddress(Uri);
+
+            HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
+            httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
+
+            var messageElement = new TextMessageEncodingBindingElement();
+            messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
+            CustomBinding bind = new CustomBinding(messageElement, httpBinding);
+
+            Onvif_Interface.OnvifMediaServiceReference.MediaClient mediaClient = new Onvif_Interface.OnvifMediaServiceReference.MediaClient(bind, serviceAddress);
+
+            if (username != string.Empty)
+            {
+                // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
+                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password, deviceTimeOffset);
                 mediaClient.Endpoint.Behaviors.Add(behavior);
             }
 

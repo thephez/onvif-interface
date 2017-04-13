@@ -117,12 +117,13 @@ namespace Onvif_Interface
             // ONVIF application programmer guide (5.1.3) suggests checking time first 
             // (no auth required) so time offset can be determined (needed for auth if applicable)
             client = OnvifServices.GetOnvifDeviceClient(IP.ToString(), Port);
-            GetDeviceTime(client);
+            System.DateTime dt = GetDeviceTime(client);
+            double deviceTimeOffset = (System.DateTime.UtcNow - dt).TotalSeconds;
 
             // Switch to an authenticated client if the username field contains something
             if (txtUser.Text != string.Empty)
-                client = OnvifServices.GetOnvifDeviceClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
-
+                client = OnvifServices.GetOnvifDeviceClient(IP.ToString(), Port, deviceTimeOffset, txtUser.Text, txtPassword.Text);
+                        
             GetDeviceInfo(client);
             GetServices(client);
 
@@ -137,10 +138,10 @@ namespace Onvif_Interface
                 gbxPtzControl.Enabled = false;
             }
 
-            GetMediaInfo();
+            GetMediaInfo(deviceTimeOffset);
         }
 
-        private void GetDeviceTime(DeviceClient client)
+        private System.DateTime GetDeviceTime(DeviceClient client)
         {
             // Should compare recieved timestamp with local machine.  If out of sync, authentication may fail
             SystemDateTime dt = client.GetSystemDateAndTime();
@@ -148,6 +149,8 @@ namespace Onvif_Interface
             string time = string.Format("{0:00}:{1:00}:{2:00}", dt.UTCDateTime.Time.Hour, dt.UTCDateTime.Time.Minute, dt.UTCDateTime.Time.Second);
             lblDeviceTime.Text = string.Format("Device Time: {0} {1}", date, time);
             File.AppendAllText("info.txt", string.Format("\n\nDate and Time from: {0}:{1} [UTC Date: {2}, UTC Time: {3}]", IP.ToString(), Port, date, time));
+            System.DateTime deviceTime = new System.DateTime(dt.UTCDateTime.Date.Year, dt.UTCDateTime.Date.Month, dt.UTCDateTime.Date.Day, dt.UTCDateTime.Time.Hour, dt.UTCDateTime.Time.Minute, dt.UTCDateTime.Time.Second);
+            return deviceTime;
         }
 
         private void GetDeviceInfo(DeviceClient client)
@@ -220,14 +223,15 @@ namespace Onvif_Interface
             //DeviceServiceCapabilities dsc = client.GetServiceCapabilities();
         }
 
-        private void GetMediaInfo()
+        private void GetMediaInfo(double deviceTimeOffset)
         {
             lbxCapabilities.Items.Add("");
             lbxCapabilities.Items.Add("Media Info");
 
             //OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
             string xaddr = ServiceUris[OnvifNamespace.MEDIA];
-            OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(xaddr, txtUser.Text, txtPassword.Text);
+            //OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(xaddr, txtUser.Text, txtPassword.Text);
+            OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(xaddr, deviceTimeOffset, txtUser.Text, txtPassword.Text);
 
             OnvifMediaServiceReference.VideoSource[] videoSources = mclient.GetVideoSources();
             foreach (OnvifMediaServiceReference.VideoSource v in videoSources)
