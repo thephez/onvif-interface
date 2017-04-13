@@ -21,6 +21,7 @@ namespace Onvif_Interface
         Dictionary<string, string> ServiceUris = new Dictionary<string, string>();
         OnvifHttpListener HttpListener = new OnvifHttpListener();
         OnvifEvents Event = new OnvifEvents();
+        System.Timers.Timer UpdateTime = new System.Timers.Timer(1000);
 
         public Form1()
         {
@@ -56,6 +57,16 @@ namespace Onvif_Interface
             HttpListener.Notification += HttpListener_Notification;
 
             Event.Notification += Event_Notification;
+            UpdateTime.Elapsed += UpdateTime_Elapsed;
+            UpdateTime.Start();
+        }
+
+        private void UpdateTime_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (!lblTimeLocal.IsDisposed)
+                Invoke((Action)(() => lblTimeLocal.Text = string.Format("Local Time: {0:s}", System.DateTime.Now)));
+            if (!lblTimeUtc.IsDisposed)
+                Invoke((Action)(() => lblTimeUtc.Text = string.Format("UTC Time:  {0:s}", System.DateTime.UtcNow)));
         }
 
         private void Event_Notification(object sender, EventArgs e)
@@ -118,12 +129,12 @@ namespace Onvif_Interface
             // (no auth required) so time offset can be determined (needed for auth if applicable)
             client = OnvifServices.GetOnvifDeviceClient(IP.ToString(), Port);
             System.DateTime dt = GetDeviceTime(client);
-            double deviceTimeOffset = (System.DateTime.UtcNow - dt).TotalSeconds;
+            double deviceTimeOffset = (dt - System.DateTime.UtcNow).TotalSeconds;
 
             // Switch to an authenticated client if the username field contains something
             if (txtUser.Text != string.Empty)
                 client = OnvifServices.GetOnvifDeviceClient(IP.ToString(), Port, deviceTimeOffset, txtUser.Text, txtPassword.Text);
-                        
+
             GetDeviceInfo(client);
             GetServices(client);
 
@@ -145,11 +156,17 @@ namespace Onvif_Interface
         {
             // Should compare recieved timestamp with local machine.  If out of sync, authentication may fail
             SystemDateTime dt = client.GetSystemDateAndTime();
-            string date = string.Format("{0:0000}-{1:00}-{2:00}", dt.UTCDateTime.Date.Year, dt.UTCDateTime.Date.Month, dt.UTCDateTime.Date.Day);
-            string time = string.Format("{0:00}:{1:00}:{2:00}", dt.UTCDateTime.Time.Hour, dt.UTCDateTime.Time.Minute, dt.UTCDateTime.Time.Second);
-            lblDeviceTime.Text = string.Format("Device Time: {0} {1}", date, time);
-            File.AppendAllText("info.txt", string.Format("\n\nDate and Time from: {0}:{1} [UTC Date: {2}, UTC Time: {3}]", IP.ToString(), Port, date, time));
             System.DateTime deviceTime = new System.DateTime(dt.UTCDateTime.Date.Year, dt.UTCDateTime.Date.Month, dt.UTCDateTime.Date.Day, dt.UTCDateTime.Time.Hour, dt.UTCDateTime.Time.Minute, dt.UTCDateTime.Time.Second);
+            File.AppendAllText("info.txt", string.Format("\n\nDate and Time from: {0}:{1} [UTC Date: {2}, UTC Time: {3}]", IP.ToString(), Port, deviceTime.Date.ToLongDateString(), deviceTime.TimeOfDay.ToString()));
+
+            double offset = (deviceTime - System.DateTime.UtcNow).TotalSeconds;
+            if (Math.Abs(offset) >= 5)
+                lblDeviceTime.ForeColor = System.Drawing.Color.Red;
+            else
+                lblDeviceTime.ForeColor = System.Drawing.Color.Black;
+
+            lblDeviceTime.Text = string.Format("Device Time: {0:u} ({1:0.0} sec)", deviceTime, offset);
+
             return deviceTime;
         }
 
@@ -195,7 +212,23 @@ namespace Onvif_Interface
             lbxCapabilities.Items.Add("");
             ServiceUris.Clear();
 
-            Service[] svc = client.GetServices(IncludeCapability: true); // Bosch Autodome 800 response can't be deserialized if IncludeCapability enabled
+            Service[] svc = null;
+            try
+            {
+                svc = client.GetServices(IncludeCapability: true);
+            }
+            catch
+            {
+                // Bosch Autodome 800 response can't be deserialized if IncludeCapability enabled
+                // Ignore and try with IncludeCapability disabled
+            }
+
+            // Try with IncludeCapability disabled
+            if (svc == null)
+            {
+                svc = client.GetServices(IncludeCapability: false); // Bosch Autodome 800 response can't be deserialized if IncludeCapability enabled
+            }
+
             foreach (Service s in svc)
             {
                 Console.WriteLine(s.XAddr + " " + " " + s.Namespace);  // Not present on Axis + s.Capabilities.NamespaceURI);
@@ -578,6 +611,8 @@ namespace Onvif_Interface
 
         private void Form1_Closing(object sender, FormClosedEventArgs e)
         {
+            UpdateTime.Stop();
+            UpdateTime.Dispose();
             Event?.Unsubscribe();
         }
 

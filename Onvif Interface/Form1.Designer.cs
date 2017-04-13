@@ -74,6 +74,8 @@
             this.lbxEvents = new System.Windows.Forms.ListBox();
             this.lblEvents = new System.Windows.Forms.Label();
             this.btnSubscribe = new System.Windows.Forms.Button();
+            this.lblTimeUtc = new System.Windows.Forms.Label();
+            this.lblTimeLocal = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.gbxDeviceInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numPort)).BeginInit();
@@ -570,11 +572,31 @@
             this.btnSubscribe.UseVisualStyleBackColor = true;
             this.btnSubscribe.Click += new System.EventHandler(this.btnSubscribe_Click);
             // 
+            // lblTimeUtc
+            // 
+            this.lblTimeUtc.AutoSize = true;
+            this.lblTimeUtc.Location = new System.Drawing.Point(12, 221);
+            this.lblTimeUtc.Name = "lblTimeUtc";
+            this.lblTimeUtc.Size = new System.Drawing.Size(55, 13);
+            this.lblTimeUtc.TabIndex = 21;
+            this.lblTimeUtc.Text = "UTC Time";
+            // 
+            // lblTimeLocal
+            // 
+            this.lblTimeLocal.AutoSize = true;
+            this.lblTimeLocal.Location = new System.Drawing.Point(12, 208);
+            this.lblTimeLocal.Name = "lblTimeLocal";
+            this.lblTimeLocal.Size = new System.Drawing.Size(59, 13);
+            this.lblTimeLocal.TabIndex = 22;
+            this.lblTimeLocal.Text = "Local Time";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(866, 662);
+            this.Controls.Add(this.lblTimeLocal);
+            this.Controls.Add(this.lblTimeUtc);
             this.Controls.Add(this.btnSubscribe);
             this.Controls.Add(this.lblEvents);
             this.Controls.Add(this.lbxEvents);
@@ -656,6 +678,8 @@
         private System.Windows.Forms.ListBox lbxEvents;
         private System.Windows.Forms.Label lblEvents;
         private System.Windows.Forms.Button btnSubscribe;
+        private System.Windows.Forms.Label lblTimeUtc;
+        private System.Windows.Forms.Label lblTimeLocal;
     }
 }
 

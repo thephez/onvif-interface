@@ -69,7 +69,7 @@ namespace Microsoft.ServiceModel.Samples.CustomToken
         /// <param name="DeviceTimeOffset">Difference between client UTC time and device UTC time in seconds</param>
         public UsernameToken(UsernameInfo usernameInfo, double DeviceTimeOffset) : this(usernameInfo, null, null)
         {
-            _created = DateTime.UtcNow - TimeSpan.FromSeconds(DeviceTimeOffset);
+            _created = DateTime.UtcNow + TimeSpan.FromSeconds(DeviceTimeOffset);
         }
 
         public UsernameInfo UsernameInfo { get { return _usernameInfo; } }
