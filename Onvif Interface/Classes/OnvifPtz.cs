@@ -6,21 +6,12 @@ namespace SDS.Video.Onvif
 {
     class OnvifPtz
     {
-        //private System.Net.IPAddress IP;
-        //private int Port;
         private string User;
         private string Password;
         private PTZClient PtzClient;
         private Onvif_Interface.OnvifMediaServiceReference.MediaClient MediaClient;
+        private Onvif_Interface.OnvifMediaServiceReference.Profile MediaProfile { get; set; }
         public bool PtzAvailable;
-
-        //public OnvifPtz(string ip, int port)
-        //{
-        //    System.Net.IPAddress.TryParse(ip, out IP);
-        //    Port = port;
-        //    PtzClient = OnvifServices.GetOnvifPTZClient(IP.ToString(), port);
-        //    MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port);
-        //}
 
         //public OnvifPtz(string ip, int port, string user, string password)
         //{
@@ -51,12 +42,25 @@ namespace SDS.Video.Onvif
         /// <returns>Media profile with PTZConfiguration</returns>
         private Onvif_Interface.OnvifMediaServiceReference.Profile GetMediaProfile()
         {
-            Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
-
-            foreach (Onvif_Interface.OnvifMediaServiceReference.Profile p in mediaProfiles)
+            if (MediaProfile != null)
             {
-                if (p.PTZConfiguration != null)
-                    return MediaClient.GetProfile(p.token);
+                return MediaProfile;
+            }
+            else
+            {
+                //log.Warn(string.Format("PTZ Media profile not assigned.  Finding first available PTZ-enabled profile - THIS MAY CAUSE ISSUES (commands sent to wrong stream) AND NEEDS TO BE CHANGED"));
+                // If no profile defined, take a guess and select the first available one - THIS NEEDS TO GO AWAY EVENTUALLY
+                Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
+
+                foreach (Onvif_Interface.OnvifMediaServiceReference.Profile p in mediaProfiles)
+                {
+                    if (p.PTZConfiguration != null)
+                    {
+                        // This should eliminate the redundant GetProfiles() / GetProfile() calls that were being done on every command
+                        MediaProfile = MediaClient.GetProfile(p.token);
+                        return MediaProfile;
+                    }
+                }
             }
 
             throw new Exception("No media profiles containing a PTZConfiguration on this device");
@@ -126,7 +130,6 @@ namespace SDS.Video.Onvif
             string presetToken = string.Empty;
 
             Onvif_Interface.OnvifMediaServiceReference.Profile mediaProfile = GetMediaProfile();
-            //Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
             string profileToken = mediaProfile.token;
 
             PTZPreset[] presets = PtzClient.GetPresets(profileToken);
@@ -150,7 +153,7 @@ namespace SDS.Video.Onvif
         /// </summary>
         /// <param name="profileToken"></param>
         /// <param name="presetToken"></param>
-        public void ShowPreset(string profileToken, string presetToken)
+        private void ShowPreset(string profileToken, string presetToken)
         {
             Onvif_Interface.OnvifMediaServiceReference.Profile[] mediaProfiles = MediaClient.GetProfiles();
             profileToken = mediaProfiles[0].token;

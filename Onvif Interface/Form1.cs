@@ -131,7 +131,7 @@ namespace Onvif_Interface
             // (no auth required) so time offset can be determined (needed for auth if applicable)
             client = OnvifServices.GetOnvifDeviceClient(IP.ToString(), Port);
             System.DateTime dt = GetDeviceTime(client);
-            double DeviceTimeOffset = (dt - System.DateTime.UtcNow).TotalSeconds;
+            DeviceTimeOffset = (dt - System.DateTime.UtcNow).TotalSeconds;
 
             // Switch to an authenticated client if the username field contains something
             if (txtUser.Text != string.Empty)
@@ -140,7 +140,7 @@ namespace Onvif_Interface
             GetDeviceInfo(client);
             GetServices(client);
 
-            if (lbxCapabilities.Items.Contains("http://www.onvif.org/ver20/ptz/wsdl"))
+            if (lbxCapabilities.Items.Contains(OnvifNamespace.PTZ))
             {
                 gbxPtzControl.Enabled = true;
                 GetPtzServices(ip, port, DeviceTimeOffset);
@@ -386,13 +386,13 @@ namespace Onvif_Interface
             if (txtUser.Text != string.Empty)
             {
                 //ptzService = OnvifServices.GetOnvifPTZClient(ip, port, txtUser.Text, txtPassword.Text);
-                ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], deviceTimeOffset, txtUser.Text, txtPassword.Text);
+                ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris[OnvifNamespace.PTZ], deviceTimeOffset, txtUser.Text, txtPassword.Text);
                 //mediaService = OnvifServices.GetOnvifMediaClient(ip, port, txtUser.Text, txtPassword.Text);
                 mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris[OnvifNamespace.MEDIA], deviceTimeOffset, txtUser.Text, txtPassword.Text);
             }
             else
             {
-                ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], deviceTimeOffset, "", "");
+                ptzService = OnvifServices.GetOnvifPTZClient(ServiceUris[OnvifNamespace.PTZ], deviceTimeOffset, "", "");
                 mediaService = OnvifServices.GetOnvifMediaClient(ServiceUris[OnvifNamespace.MEDIA], deviceTimeOffset, "", "");
             }
 
@@ -464,7 +464,7 @@ namespace Onvif_Interface
         private void PtzStop()
         {
             //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
-            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris[OnvifNamespace.PTZ], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
             ptz.Stop();
         }
 
@@ -529,7 +529,7 @@ namespace Onvif_Interface
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
             //OnvifPtz ptz = new OnvifPtz(IP, Port, txtUser.Text, txtPassword.Text);
-            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris[OnvifNamespace.PTZ], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
             ptz.Pan(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -537,7 +537,7 @@ namespace Onvif_Interface
         private void BtnPanRight_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris[OnvifNamespace.PTZ], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
             ptz.Pan(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -545,7 +545,7 @@ namespace Onvif_Interface
         private void BtnTiltUp_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris[OnvifNamespace.PTZ], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
             ptz.Tilt(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -553,7 +553,7 @@ namespace Onvif_Interface
         private void BtnTiltDown_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris[OnvifNamespace.PTZ], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
             ptz.Tilt(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -561,7 +561,7 @@ namespace Onvif_Interface
         private void BtnZoomOut_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris[OnvifNamespace.PTZ], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
             ptz.Zoom(-speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -569,7 +569,7 @@ namespace Onvif_Interface
         private void BtnZoomIn_MouseDown(object sender, MouseEventArgs e)
         {
             float speed = (float)numPtzCmdSpeed.Value / 100;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris[OnvifNamespace.PTZ], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
             ptz.Zoom(speed);
             UpdatePtzLocation(ptz.GetPtzLocation());
         }
@@ -577,7 +577,7 @@ namespace Onvif_Interface
         private void BtnPreset_Click(object sender, EventArgs e)
         {
             Button btn = (Button)sender;
-            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris["http://www.onvif.org/ver20/ptz/wsdl"], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
+            OnvifPtz ptz = new OnvifPtz(ServiceUris[OnvifNamespace.MEDIA], ServiceUris[OnvifNamespace.PTZ], DeviceTimeOffset, txtUser.Text, txtPassword.Text);
             try
             {
                 ptz.ShowPreset(Convert.ToInt32(btn.Text));
