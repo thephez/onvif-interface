@@ -265,7 +265,6 @@ namespace Onvif_Interface
 
             //OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, txtUser.Text, txtPassword.Text);
             string xaddr = ServiceUris[OnvifNamespace.MEDIA];
-            //OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(xaddr, txtUser.Text, txtPassword.Text);
             OnvifMediaServiceReference.MediaClient mclient = OnvifServices.GetOnvifMediaClient(xaddr, deviceTimeOffset, txtUser.Text, txtPassword.Text);
 
             OnvifMediaServiceReference.VideoSource[] videoSources = mclient.GetVideoSources();
@@ -274,11 +273,13 @@ namespace Onvif_Interface
                 string vsInfo = string.Format("  Video Source {0}: Framerate={1}, Resolution={2}x{3}", v.token, v.Framerate, v.Resolution.Width, v.Resolution.Height);
                 lbxCapabilities.Items.Add(string.Format("{0}", vsInfo));
             }
+
             OnvifMediaServiceReference.Profile[] mProfiles = mclient.GetProfiles();
-            foreach (OnvifMediaServiceReference.Profile p in mProfiles)
+            for (int i = 0; i < mProfiles.Length; i++)
             {
+                Profile p = mProfiles[i];
                 string ptz = p.PTZConfiguration != null ? "Yes" : "No";
-                string pInfo = string.Format("  Profile {0}: Token={1}, PTZ={2}", p.Name, p.token, ptz);
+                string pInfo = string.Format("  Profile #{0} [{1}]: Token={2}, PTZ={3}", i + 1, p.Name, p.token, ptz);
                 lbxCapabilities.Items.Add(string.Format("{0}", pInfo));
 
                 List<string> uris = GetMediaProfileUris(mclient, p);
