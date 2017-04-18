@@ -26,14 +26,14 @@ namespace SDS.Video.Onvif
         /// <param name="uri">XAddr URI for Onvif events</param>
         /// <param name="username">User</param>
         /// <param name="password">Password</param>
-        public void Subscribe(string uri, string username, string password)
+        public void Subscribe(string uri, double deviceTimeOffset, string username, string password)
         {
-            EventPortTypeClient eptc = OnvifServices.GetEventClient(uri, username, password);
+            EventPortTypeClient eptc = OnvifServices.GetEventClient(uri, deviceTimeOffset, username, password);
 
             string localIP = GetLocalIp();
 
             // Producer client
-            NotificationProducerClient npc = OnvifServices.GetNotificationProducerClient(uri, username, password); // ip, port, username, password);
+            NotificationProducerClient npc = OnvifServices.GetNotificationProducerClient(uri, deviceTimeOffset, username, password); // ip, port, username, password);
             npc.Endpoint.Address = eptc.Endpoint.Address;
 
             Subscribe s = new Subscribe();
@@ -59,7 +59,7 @@ namespace SDS.Video.Onvif
 
                 OnNotification(string.Format("Initial Termination Time: {0} (Current Time: {1})", SubTermTime, System.DateTime.UtcNow));
 
-                SubscriptionManagerClient = OnvifServices.GetSubscriptionManagerClient(SubRenewUri, username, password);
+                SubscriptionManagerClient = OnvifServices.GetSubscriptionManagerClient(SubRenewUri, deviceTimeOffset, username, password);
             }
             catch (Exception e)
             {

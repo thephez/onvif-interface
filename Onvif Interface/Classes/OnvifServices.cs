@@ -57,29 +57,6 @@ namespace SDS.Video.Onvif
             return deviceClient;
         }
 
-        public static Onvif_Interface.OnvifMediaServiceReference.MediaClient GetOnvifMediaClient(string Uri, string username = "", string password = "")
-        {
-            EndpointAddress serviceAddress = new EndpointAddress(Uri);
-
-            HttpTransportBindingElement httpBinding = new HttpTransportBindingElement();
-            httpBinding.AuthenticationScheme = AuthenticationSchemes.Digest;
-
-            var messageElement = new TextMessageEncodingBindingElement();
-            messageElement.MessageVersion = MessageVersion.CreateVersion(EnvelopeVersion.Soap12, AddressingVersion.None);
-            CustomBinding bind = new CustomBinding(messageElement, httpBinding);
-
-            Onvif_Interface.OnvifMediaServiceReference.MediaClient mediaClient = new Onvif_Interface.OnvifMediaServiceReference.MediaClient(bind, serviceAddress);
-
-            if (username != string.Empty)
-            {
-                // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
-                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
-                mediaClient.Endpoint.Behaviors.Add(behavior);
-            }
-
-            return mediaClient;
-        }
-
         public static Onvif_Interface.OnvifMediaServiceReference.MediaClient GetOnvifMediaClient(string Uri, double deviceTimeOffset, string username = "", string password = "")
         {
             EndpointAddress serviceAddress = new EndpointAddress(Uri);
@@ -103,7 +80,7 @@ namespace SDS.Video.Onvif
             return mediaClient;
         }
 
-        public static PTZClient GetOnvifPTZClient(string Uri, string username = "", string password = "")
+        public static PTZClient GetOnvifPTZClient(string Uri, double deviceTimeOffset, string username = "", string password = "")
         {
             EndpointAddress serviceAddress = new EndpointAddress(Uri);
 
@@ -126,7 +103,7 @@ namespace SDS.Video.Onvif
             return ptzClient;
         }
 
-        public static EventPortTypeClient GetEventClient(string uri, string username = "", string password = "")
+        public static EventPortTypeClient GetEventClient(string uri, double deviceTimeOffset, string username = "", string password = "")
         {
             EndpointAddress serviceAddress = new EndpointAddress(uri);
 
@@ -142,14 +119,14 @@ namespace SDS.Video.Onvif
             if (username != string.Empty)
             {
                 // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
-                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
+                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password, deviceTimeOffset);
                 client.Endpoint.Behaviors.Add(behavior);
             }
 
             return client;
         }
 
-        public static SubscriptionManagerClient GetSubscriptionManagerClient(string uri, string username = "", string password = "") // string ip, int port, List<MessageHeader> headers)
+        public static SubscriptionManagerClient GetSubscriptionManagerClient(string uri, double deviceTimeOffset, string username = "", string password = "") // string ip, int port, List<MessageHeader> headers)
         {
             EndpointAddress serviceAddress = new EndpointAddress(uri); // string.Format("http://{0}:{1}/onvif/event_service", ip, port));
 
@@ -165,14 +142,14 @@ namespace SDS.Video.Onvif
             if (username != string.Empty)
             {
                 // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
-                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
+                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password, deviceTimeOffset);
                 client.Endpoint.Behaviors.Add(behavior);
             }
 
             return client;
         }
 
-        public static NotificationProducerClient GetNotificationProducerClient(string uri, string username = "", string password = "")
+        public static NotificationProducerClient GetNotificationProducerClient(string uri, double deviceTimeOffset, string username = "", string password = "")
         {
             EndpointAddress serviceAddress = new EndpointAddress(uri);
 
@@ -188,7 +165,7 @@ namespace SDS.Video.Onvif
             if (username != string.Empty)
             {
                 // Handles adding of SOAP Security header containing User Token (user, nonce, pwd digest)
-                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password);
+                PasswordDigestBehavior behavior = new PasswordDigestBehavior(username, password, deviceTimeOffset);
                 client.Endpoint.Behaviors.Add(behavior);
             }
 

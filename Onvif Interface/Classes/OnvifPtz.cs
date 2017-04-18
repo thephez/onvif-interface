@@ -33,7 +33,7 @@ namespace SDS.Video.Onvif
         //    MediaClient = OnvifServices.GetOnvifMediaClient(IP.ToString(), Port, User, Password);
         //}
 
-        public OnvifPtz(string mediaUri, string ptzUri, string user, string password)
+        public OnvifPtz(string mediaUri, string ptzUri, double deviceTimeOffset, string user, string password)
         {
             User = user;
             Password = password;
@@ -41,8 +41,8 @@ namespace SDS.Video.Onvif
             if (string.IsNullOrEmpty(mediaUri) | string.IsNullOrEmpty(ptzUri))
                 throw new Exception("Media and/or PTZ URI is empty or null.  PTZ object cannot be created");
 
-            PtzClient = OnvifServices.GetOnvifPTZClient(ptzUri, User, Password);
-            MediaClient = OnvifServices.GetOnvifMediaClient(mediaUri, User, Password);
+            PtzClient = OnvifServices.GetOnvifPTZClient(ptzUri, deviceTimeOffset, User, Password);
+            MediaClient = OnvifServices.GetOnvifMediaClient(mediaUri, deviceTimeOffset, User, Password);
         }
 
         /// <summary>
